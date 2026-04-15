@@ -30,7 +30,7 @@ impl Grappler{
             colliding_left : false,
             colliding_right : false,
             sprite: s,
-            gravity: 2000.0,
+            gravity: 1000.0,
             grappled_to: None
         }   
     }
@@ -46,8 +46,71 @@ impl Grappler{
         self.grappled_to = Some(target as *const dyn Pointable);
     }
 
+    pub fn grapple_closest(&mut self, targets: &[impl Pointable + 'static]) {
+        let mut closest_dist: f32 = -1.0;
+        // im so sorry i don't know how anything works so this is kinda janky
+        for i in targets {
+
+            // no point in sqrting it i think
+            let mut dist = (i.get_position().x - self.position.x).powf(2.0) 
+            + (i.get_position().y - self.position.y).powf(2.0);
+            
+            // i don't wait it to grapply smth behind it but like maybe it needs to
+            if (i.get_position().x - self.position.x)* self.velocity.x < 0.0{
+                dist *= 1000.0;
+            }
+            
+            if closest_dist < 0.0 || dist < closest_dist {
+                closest_dist = dist;
+                self.set_grapple(i);
+            }
+        }
+        self.velocity.x *= 3.0;
+        self.velocity.y *= 3.0;
+    }
+
     pub fn unset_grapple(&mut self) {
         self.grappled_to = None;
+    }
+
+    pub fn update_position(&mut self, delta_time: f32) {
+        let mut dist: f32 = 0.0;
+        if(self.is_grappling()){
+            // i'm not fully sure why i have to do this
+            if let Some(ptr) = self.grappled_to {
+                let target_pos = unsafe { (*ptr).get_position() };
+                
+                let x_diff = self.get_position().x - target_pos.x;
+                let y_diff = self.get_position().y - target_pos.y;
+
+                dist = (x_diff.powf(2.0) + y_diff.powf(2.0)).sqrt();
+            }
+        }
+
+        self.set_position(Vector2{ 
+            x: self.get_position().x + self.get_velocity().x * delta_time,
+            y: self.get_position().y + self.get_velocity().y * delta_time,
+            }
+        );
+
+        if(self.is_grappling()){
+            // i'm not fully sure why i have to do this
+            if let Some(ptr) = self.grappled_to {
+                let target_pos = unsafe { (*ptr).get_position() };
+                
+                let x_diff = self.get_position().x - target_pos.x;
+                let y_diff = self.get_position().y - target_pos.y;
+
+                let correction = (x_diff.powf(2.0) + y_diff.powf(2.0)).sqrt() - dist;
+
+                let mut correct = Vector2{x:x_diff, y:y_diff}.normalized();
+                correct.x *= correction;
+                correct.y *= correction;
+
+                self.set_position(Vector2{x:self.get_position().x - correct.x, y: self.get_position().y-correct.y})
+            }
+        }
+
     }
 
 }
@@ -58,12 +121,24 @@ impl Pointable for Grappler{
 
 impl Entity for Grappler{
 
+    fn render(&self, draw: &mut RaylibDrawHandle){
+         if(self.is_grappling()){
+                // i'm not fully sure why i have to do this
+                if let Some(ptr) = self.grappled_to {
+                    let grapple_pos = unsafe { (*ptr).get_position() };
+                    draw.draw_line_ex(self.position, grapple_pos, 1.5, Color::BLACK);
+            }
+        }
+        self._render_sprite(draw);
+    }
+
     fn update(&mut self, delta_time: f32){
         if(self.is_grappling()){
             // i'm not fully sure why i have to do this
             if let Some(ptr) = self.grappled_to {
                 let target_pos = unsafe { (*ptr).get_position() };
 
+                
                 let x_diff = self.get_position().x - target_pos.x;
                 let y_diff = self.get_position().y - target_pos.y;
                 
@@ -89,31 +164,7 @@ impl Entity for Grappler{
         self.update_velocity(delta_time);
     }
 
-     fn update_position_x(&mut self, delta_time: f32) {
 
-        // if self.is_grappling() {
-        //     return;
-        // }
-
-        self.set_position(Vector2 { 
-            x: self.get_position().x 
-               + self.get_velocity().x * delta_time ,
-            y: self.get_position().y 
-        });
-    }
-
-    fn update_position_y(&mut self, delta_time: f32) {
-
-        // if self.is_grappling() {
-        //     return;
-        // }
-
-        self.set_position(Vector2 {
-            x: self.get_position().x, 
-            y: self.get_position().y 
-               + self.get_velocity().y * delta_time
-        });
-    }
 
 
     fn get_velocity(&self) -> &Vector2 { &self.velocity }

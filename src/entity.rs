@@ -97,6 +97,8 @@ pub trait Entity: Pointable {
         );
     }
 
+    
+
     fn is_colliding(&self, other: &impl Entity) -> bool {
         if !other.is_active() {
             return false;
@@ -170,8 +172,8 @@ pub trait Entity: Pointable {
     //     self.resolve_collision_x(other);
     // }
 
-    fn render(&self, draw: &mut RaylibDrawHandle){
-         if !self.is_active() { return; }
+    fn _render_sprite(&self, draw: &mut RaylibDrawHandle){
+        if !self.is_active() { return; }
         
         //will be centered on position
         let destination_area = Rectangle::new(
@@ -194,6 +196,10 @@ pub trait Entity: Pointable {
             0.0, Color::WHITE
         );
 
-    // displayCollider();
+        // displayCollider();
+    }
+
+    fn render(&self, draw: &mut RaylibDrawHandle){
+        self._render_sprite(draw);
     }
 }
