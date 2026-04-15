@@ -1,5 +1,5 @@
 use raylib::prelude::*;
-use crate::entity::{Entity, Pointable, Sprite};
+use crate::entity::{Entity, Positioned, Sprite};
 
 pub struct Grappler{
     position : Vector2,
@@ -12,7 +12,7 @@ pub struct Grappler{
     colliding_right : bool,
     sprite: Sprite,
     gravity: f32,
-    grappled_to: Option<*const dyn Pointable>,
+    grappled_to: Option<*const dyn Positioned>,
 }
 
 impl Grappler{
@@ -42,11 +42,11 @@ impl Grappler{
     // ngl i don't know what static does
     // but the compiler suggested i do this and it worked
     // so W compiler ig
-    pub fn set_grapple(&mut self, target: &(impl Pointable + 'static)) {
-        self.grappled_to = Some(target as *const dyn Pointable);
+    pub fn set_grapple(&mut self, target: &(impl Positioned + 'static)) {
+        self.grappled_to = Some(target as *const dyn Positioned);
     }
 
-    pub fn grapple_closest(&mut self, targets: &[impl Pointable + 'static]) {
+    pub fn grapple_closest(&mut self, targets: &[impl Positioned + 'static]) {
         let mut closest_dist: f32 = -1.0;
         // im so sorry i don't know how anything works so this is kinda janky
         for i in targets {
@@ -65,8 +65,8 @@ impl Grappler{
                 self.set_grapple(i);
             }
         }
-        self.velocity.x *= 3.0;
-        self.velocity.y *= 3.0;
+        self.velocity.x *= 1.2;
+        self.velocity.y *= 1.2;
     }
 
     pub fn unset_grapple(&mut self) {
@@ -115,7 +115,7 @@ impl Grappler{
 
 }
 
-impl Pointable for Grappler{
+impl Positioned for Grappler{
     fn get_position(&self) -> &Vector2 { &self.position }
 }
 

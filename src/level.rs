@@ -3,17 +3,12 @@ use raylib::prelude::*;
 use crate::entity::Entity;
 use crate::platformer::Platformer;
 use crate::grappler::Grappler;
+use crate::scene::{Scene, AppStatus};
 
 
 const FPS: u32 = 60;
 
-#[derive(PartialEq)]
-enum AppStatus {
-    Running,
-    Terminated,
-}
-
-pub struct Game {
+pub struct Level {
     rl: RaylibHandle,
     thread: RaylibThread,
     app_status: AppStatus,
@@ -23,12 +18,19 @@ pub struct Game {
     blocks: Vec<Platformer>,
 }
 
-impl Game {
-    pub fn new() -> Game {
+impl Level{
+    pub fn add_block(&mut self, x:f32, y:f32, texture_path:&str){
+        let texture2 =self.rl.load_texture(&self.thread, &texture_path).unwrap();
+        let mut block1 = Platformer::new(texture2,Vector2{x:10.0,y:10.0});
+        block1.set_position(Vector2 { x,y });
+        self.blocks.push(block1)
+    }
+
+    pub fn new() -> Level {
         let (mut rl, thread) = 
             raylib::init()
                 .size(1200, 675)
-                .title("Hello, World")
+                .title("Game!!")
                 .build();
 
             let texture1 = rl.load_texture(&thread, "assets/blue.png").unwrap();
@@ -38,7 +40,7 @@ impl Game {
             
         rl.set_target_fps(FPS);
 
-        Game {
+        Level {
             rl,
             thread,
             app_status: AppStatus::Running,
@@ -47,22 +49,25 @@ impl Game {
             blocks: vec![],
         }
     }
+}
+impl Scene for Level {
 
-    pub fn run(&mut self) {
-
-        for i in 0..10{
-            let texture2 =self.rl.load_texture(&self.thread, "assets/blue.png").unwrap();
-            let mut block1 = Platformer::new(texture2,Vector2{x:10.0,y:10.0});
-            block1.set_position(Vector2 { x: 200.0 + 100.0 * i as f32, y: 10.0 + 50.0 * i as f32 });
-            self.blocks.push(block1)
-        }
-
-        while self.app_status != AppStatus::Terminated {
-            self.process_input();
-            self.update();
-            self.render();
-        }
+    fn get_status(&self) -> AppStatus{
+        return self.app_status;
     }
+
+    
+
+    // fn run(&mut self) {
+
+    //   
+
+    //     while self.app_status != AppStatus::Terminated {
+    //         self.process_input();
+    //         self.update();
+    //         self.render();
+    //     }
+    // }
 
     fn process_input(&mut self){
         // let key = self.rl.get_key_pressed();

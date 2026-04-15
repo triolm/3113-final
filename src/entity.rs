@@ -43,11 +43,11 @@ impl Sprite{
 }
 
 
-pub trait Pointable {
+pub trait Positioned {
     fn get_position(&self) -> &Vector2;
 }
 
-pub trait Entity: Pointable {
+pub trait Entity: Positioned {
     // fn get_position(&self) -> &Vector2;
     fn get_velocity(&self) -> &Vector2;
     fn get_acceleration(&self) -> &Vector2;

@@ -1,5 +1,5 @@
 use raylib::prelude::*;
-use crate::entity::{Entity, Pointable, Sprite};
+use crate::entity::{Entity, Positioned, Sprite};
 
 pub struct Platformer{
     position : Vector2,
@@ -61,7 +61,7 @@ impl Platformer{
     }
 }
 
-impl Pointable for Platformer{
+impl Positioned for Platformer{
     fn get_position(&self) -> &Vector2 { &self.position }
 }
 
