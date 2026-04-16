@@ -2,6 +2,7 @@ use raylib::prelude::*;
 use crate::entity::{Entity, Positioned, Sprite};
 
 pub struct Grappler{
+    start_position : Vector2,
     position : Vector2,
     velocity : Vector2,
     acceleration : Vector2,
@@ -17,10 +18,13 @@ pub struct Grappler{
 
 impl Grappler{
 
+    fn set_start_position(&mut self, pos: Vector2) { self.start_position = pos }
+
     pub fn new(texture: Texture2D, scale: Vector2) -> Grappler{
         let s = Sprite::new(texture,scale);
 
         Grappler{
+            start_position : Vector2{x:200.0,y:200.0},
             position : Vector2{x:200.0,y:200.0},
             velocity : Vector2{x:0.0,y:0.0},
             acceleration : Vector2{x:0.0,y:0.0},
@@ -44,6 +48,10 @@ impl Grappler{
     // so W compiler ig
     pub fn set_grapple(&mut self, target: &(impl Positioned + 'static)) {
         self.grappled_to = Some(target as *const dyn Positioned);
+    }
+
+    pub fn reset_position(&mut self){
+        self.position = self.start_position;
     }
 
     pub fn grapple_closest(&mut self, targets: &[impl Positioned + 'static]) {
