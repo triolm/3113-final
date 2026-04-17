@@ -1,18 +1,24 @@
 
 use raylib::prelude::*;
-use crate::entity::Entity;
+use crate::entity::{Entity, Positioned};
 use crate::platformer::Platformer;
 use crate::grappler::Grappler;
 use crate::goal::Goal;
 use crate::scene::{Scene, AppStatus};
+use crate::murderer::Murderer;
+
+const SCALE:f32 = 1.5;
 
 pub struct Level {
     app_status: AppStatus,
     previous_ticks: f32,
     player: Grappler,
+    bg: Platformer,
     blocks: Vec<Platformer>,
+    evils: Vec<Murderer>,
     goals: Vec<Goal>,
-    next: i32
+    next: i32,
+    camera: Camera2D
 }
 
 impl Level{
@@ -31,11 +37,29 @@ impl Level{
         self.goals.push(goal);
     }
 
+    pub fn add_evil(&mut self, rl:&mut RaylibHandle, thread:&RaylibThread, x:f32, y:f32, w:f32, h:f32, texture_path:&str){
+        let texture =rl.load_texture(&thread, &texture_path).unwrap();
+        let mut evil = Murderer::new(texture,Vector2{x:w, y:h});
+        evil.set_position(Vector2 { x,y });
+        self.evils.push(evil);
+    }
+
     pub fn new(rl:&mut RaylibHandle, thread:&RaylibThread) -> Level {
 
         let texture1 = rl.load_texture(&thread, "assets/blue.png").unwrap();
-        let mut player = Grappler::new(texture1,Vector2{x:50.0,y:50.00});
-        player.set_position(Vector2 { x: 100.0, y: 0.0 });
+        let mut player = Grappler::new(texture1,Vector2{x:20.0,y:20.00});
+        player.set_start_position(Vector2 { x: 100.0, y: 100.0 });
+
+        let texture2 = rl.load_texture(&thread, "assets/Page2.png").unwrap();
+        let mut bg = Platformer::new(texture2,Vector2{x:1600.0,y:1600.00});
+        bg.set_position(Vector2 { x: 800.0, y: 800.0 });
+
+        let camera = Camera2D{
+            offset: Vector2{x:1200.0/2.0, y:675.0/2.0},
+            target:*player.get_position(),
+            rotation:0.0,
+            zoom:SCALE
+        };
 
         Level {
             app_status: AppStatus::Running,
@@ -43,16 +67,18 @@ impl Level{
             player,
             blocks: vec![],
             goals: vec![],
-            next: -1
+            evils: vec![],
+            next: -1,
+            camera,
+            bg
         }
     }
 
     pub fn init(&mut self, rl:&RaylibHandle) {
         self.next = -1;
         self.previous_ticks = rl.get_time() as f32;
-        self.player.set_position(Vector2 { x: 100.0, y: 0.0 });
-        self.player.set_velocity(Vector2 { x: 0.0, y: 0.0 });
-        self.player.set_acceleration(Vector2 { x: 0.0, y: 0.0 });
+        self.player.reset_position();
+        self.camera.target = *self.player.get_position()
     }
 
 
@@ -72,6 +98,7 @@ impl Scene for Level {
         //  self.player.reset_movement();
 
          if rl.is_key_released(KeyboardKey::KEY_SPACE) { self.player.unset_grapple();}
+         if rl.is_key_released(KeyboardKey::KEY_R) { self.init(rl);}
          else if rl.is_key_pressed(KeyboardKey::KEY_SPACE) { self.player.grapple_closest(&self.blocks);}
         //  if self.rl.is_key_down(KeyboardKey::KEY_RIGHT) { self.player.move_right();}
         //  if self.rl.is_key_down(KeyboardKey::KEY_LEFT) { self.player.move_left();}
@@ -92,11 +119,30 @@ impl Scene for Level {
 
         self.player.update_position(delta_time);
 
+        if self.player.get_position().x > 1600.0 + 200.0 ||
+           self.player.get_position().x < 0.0 ||
+           //    self.player.get_position().y < 0.0 ||
+           self.player.get_position().y > 1600.0 + 200.0 {
+            self.init(rl);
+            return;
+        }
+
         for goal in &self.goals{
             if self.player.is_colliding(goal) {
                 self.next = goal.get_next() as i32;
             }
         }
+
+        let mut is_dead:bool = false;
+        for evil in &self.evils{
+            if self.player.is_colliding(evil) {
+                is_dead = true;
+            }
+        }
+        if is_dead {
+            self.init(rl);
+        }
+
         // self.player.resolve_collision_x(&self.block2);
         // self.player.resolve_collision_x(&self.block);
         
@@ -112,16 +158,34 @@ impl Scene for Level {
         let mut d = rl.begin_drawing(thread);
 
         d.clear_background(Color::WHITE);
+        self.camera.target = Vector2 { 
+            x: 
+            (self.player.get_position().x*0.04 + self.camera.target.x*0.96), 
+            y: 
+            (self.player.get_position().y*0.04+ self.camera.target.y*0.96)
+        };
+
+        if self.camera.target.x > 1600.0 - (1200.0/2.0)/SCALE { self.camera.target.x = 1600.0 - (1200.0/2.0)/SCALE }
+        if self.camera.target.x < (1200.0/2.0)/SCALE { self.camera.target.x = (1200.0/2.0)/SCALE}
+
+        if self.camera.target.y > 1600.0 - (675.0/2.0)/SCALE { self.camera.target.y = 1600.0 - (675.0/2.0)/SCALE }
+        if self.camera.target.y < (675.0/2.0)/SCALE { self.camera.target.y = (675.0/2.0)/SCALE }
+
         // d.draw_text("Hello, world!", 12, 12, 20, Color::BLACK);
+        {
+            let mut d_cam = d.begin_mode2D(self.camera);
 
-        self.player.render(&mut d);
-        for block in &self.blocks {
-            block.render(&mut d);
+            self.bg.render(&mut d_cam);
+
+            self.player.render(&mut d_cam);
+
+            for block in &self.blocks {
+                block.render(&mut d_cam);
+            }
+
+            for goal in &self.goals {
+                goal.render(&mut d_cam);
+            }
         }
-
-        for goal in &self.goals {
-            goal.render(&mut d);
-        }
-
     }
 }

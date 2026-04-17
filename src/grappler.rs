@@ -14,11 +14,12 @@ pub struct Grappler{
     sprite: Sprite,
     gravity: f32,
     grappled_to: Option<*const dyn Positioned>,
+    max_dist: f32
 }
 
 impl Grappler{
 
-    fn set_start_position(&mut self, pos: Vector2) { self.start_position = pos }
+    pub fn set_start_position(&mut self, pos: Vector2) { self.start_position = pos }
 
     pub fn new(texture: Texture2D, scale: Vector2) -> Grappler{
         let s = Sprite::new(texture,scale);
@@ -34,8 +35,9 @@ impl Grappler{
             colliding_left : false,
             colliding_right : false,
             sprite: s,
-            gravity: 1000.0,
-            grappled_to: None
+            gravity: 400.0,
+            grappled_to: None,
+            max_dist: 0.0,
         }   
     }
 
@@ -48,10 +50,18 @@ impl Grappler{
     // so W compiler ig
     pub fn set_grapple(&mut self, target: &(impl Positioned + 'static)) {
         self.grappled_to = Some(target as *const dyn Positioned);
+        
+        let x_diff = self.get_position().x - target.get_position().x;
+        let y_diff = self.get_position().y - target.get_position().y;
+
+        self.max_dist = (x_diff.powf(2.0) + y_diff.powf(2.0)).sqrt()
     }
 
     pub fn reset_position(&mut self){
+        self.velocity = Vector2 { x: 0.0, y: 0.0 };
+        self.acceleration = Vector2 { x: 0.0, y: 0.0 };
         self.position = self.start_position;
+        self.unset_grapple();
     }
 
     pub fn grapple_closest(&mut self, targets: &[impl Positioned + 'static]) {
@@ -65,7 +75,7 @@ impl Grappler{
             
             // i don't wait it to grapply smth behind it but like maybe it needs to
             if (i.get_position().x - self.position.x)* self.velocity.x < 0.0{
-                dist *= 1000.0;
+                dist *= 3.0;
             }
             
             if closest_dist < 0.0 || dist < closest_dist {
@@ -75,6 +85,7 @@ impl Grappler{
         }
         self.velocity.x *= 1.2;
         self.velocity.y *= 1.2;
+            
     }
 
     pub fn unset_grapple(&mut self) {
@@ -82,18 +93,6 @@ impl Grappler{
     }
 
     pub fn update_position(&mut self, delta_time: f32) {
-        let mut dist: f32 = 0.0;
-        if(self.is_grappling()){
-            // i'm not fully sure why i have to do this
-            if let Some(ptr) = self.grappled_to {
-                let target_pos = unsafe { (*ptr).get_position() };
-                
-                let x_diff = self.get_position().x - target_pos.x;
-                let y_diff = self.get_position().y - target_pos.y;
-
-                dist = (x_diff.powf(2.0) + y_diff.powf(2.0)).sqrt();
-            }
-        }
 
         self.set_position(Vector2{ 
             x: self.get_position().x + self.get_velocity().x * delta_time,
@@ -109,12 +108,12 @@ impl Grappler{
                 let x_diff = self.get_position().x - target_pos.x;
                 let y_diff = self.get_position().y - target_pos.y;
 
-                let correction = (x_diff.powf(2.0) + y_diff.powf(2.0)).sqrt() - dist;
+                let correction = (x_diff.powf(2.0) + y_diff.powf(2.0)).sqrt() - self.max_dist;
 
-                let mut correct = Vector2{x:x_diff, y:y_diff}.normalized();
+                let mut correct  = Vector2{x:x_diff, y:y_diff}.normalized();
                 correct.x *= correction;
                 correct.y *= correction;
-
+                
                 self.set_position(Vector2{x:self.get_position().x - correct.x, y: self.get_position().y-correct.y})
             }
         }
@@ -149,7 +148,7 @@ impl Entity for Grappler{
                 
                 let x_diff = self.get_position().x - target_pos.x;
                 let y_diff = self.get_position().y - target_pos.y;
-                
+
                 // ngl i don't know what was wrong with normal tan. 
                 let theta = y_diff.atan2(x_diff);
 
