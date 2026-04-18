@@ -7,7 +7,7 @@ use crate::goal::Goal;
 use crate::scene::{Scene, AppStatus};
 use crate::murderer::Murderer;
 
-const SCALE:f32 = 1.5;
+const SCALE:f32 = 1.2;
 
 pub struct Level {
     app_status: AppStatus,
@@ -44,14 +44,14 @@ impl Level{
         self.evils.push(evil);
     }
 
-    pub fn new(rl:&mut RaylibHandle, thread:&RaylibThread) -> Level {
+    pub fn new(rl:&mut RaylibHandle, thread:&RaylibThread, bg_path:&str) -> Level {
 
         let texture1 = rl.load_texture(&thread, "assets/blue.png").unwrap();
         let mut player = Grappler::new(texture1,Vector2{x:20.0,y:20.00});
         player.set_start_position(Vector2 { x: 100.0, y: 100.0 });
 
-        let texture2 = rl.load_texture(&thread, "assets/Page2.png").unwrap();
-        let mut bg = Platformer::new(texture2,Vector2{x:1600.0,y:1600.00});
+        let texture2 = rl.load_texture(&thread, bg_path).unwrap();
+        let mut bg = Platformer::new(texture2,Vector2{x:1600.00,y:1600.00});
         bg.set_position(Vector2 { x: 800.0, y: 800.0 });
 
         let camera = Camera2D{
@@ -119,10 +119,10 @@ impl Scene for Level {
 
         self.player.update_position(delta_time);
 
-        if self.player.get_position().x > 1600.0 + 200.0 ||
-           self.player.get_position().x < 0.0 ||
+        if self.player.get_position().x > 1600.0 + 400.0 ||
+           self.player.get_position().x < 0.0 - 400.0 ||
            //    self.player.get_position().y < 0.0 ||
-           self.player.get_position().y > 1600.0 + 200.0 {
+           self.player.get_position().y > 1600.0 + 400.0 {
             self.init(rl);
             return;
         }
@@ -185,6 +185,10 @@ impl Scene for Level {
 
             for goal in &self.goals {
                 goal.render(&mut d_cam);
+            }
+
+            for evil in &self.evils {
+                evil.render(&mut d_cam);
             }
         }
     }

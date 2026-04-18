@@ -35,7 +35,7 @@ impl Grappler{
             colliding_left : false,
             colliding_right : false,
             sprite: s,
-            gravity: 400.0,
+            gravity: 300.0,
             grappled_to: None,
             max_dist: 0.0,
         }   
