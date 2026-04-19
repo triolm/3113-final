@@ -23,36 +23,31 @@ pub struct Level {
 }
 
 impl Level{
-    pub fn add_block(&mut self,  rl:&mut RaylibHandle, thread:&RaylibThread, x:f32, y:f32, texture_path:&str){
-        let texture = rl.load_texture(thread, &texture_path).unwrap();
-        let mut block = Platformer::new(texture,Vector2{x:10.0,y:10.0});
+    pub fn add_block(&mut self, x:f32, y:f32, texture_path:&str){
+        let mut block = Platformer::new(texture_path.to_string(),Vector2{x:10.0,y:10.0});
         block.set_position(Vector2 { x,y });
         self.blocks.push(block);
     }
 
-    pub fn add_goal(&mut self, rl:&mut RaylibHandle, thread:&RaylibThread, x:f32, y:f32, next:u32, texture_path:&str){
-        let texture =rl.load_texture(&thread, &texture_path).unwrap();
-        let mut goal = Goal::new(texture,Vector2{x:50.0,y:50.0});
+    pub fn add_goal(&mut self, x:f32, y:f32, next:u32, texture_path:&str){
+        let mut goal = Goal::new(texture_path.to_string(),Vector2{x:50.0,y:50.0});
         goal.set_position(Vector2 { x,y });
         goal.set_next(next);
         self.goals.push(goal);
     }
 
-    pub fn add_evil(&mut self, rl:&mut RaylibHandle, thread:&RaylibThread, x:f32, y:f32, w:f32, h:f32, texture_path:&str){
-        let texture =rl.load_texture(&thread, &texture_path).unwrap();
-        let mut evil = Murderer::new(texture,Vector2{x:w, y:h});
+    pub fn add_evil(&mut self, x:f32, y:f32, w:f32, h:f32, texture_path:&str){
+        let mut evil = Murderer::new(texture_path.to_string(),Vector2{x:w, y:h});
         evil.set_position(Vector2 { x,y });
         self.evils.push(evil);
     }
 
-    pub fn new(rl:&mut RaylibHandle, thread:&RaylibThread, bg_path:&str) -> Level {
+    pub fn new(bg_path:&str) -> Level {
 
-        let texture1 = rl.load_texture(&thread, "assets/blue.png").unwrap();
-        let mut player = Grappler::new(texture1,Vector2{x:20.0,y:20.00});
+        let mut player = Grappler::new("assets/blue.png".to_string(),Vector2{x:20.0,y:20.00});
         player.set_start_position(Vector2 { x: 100.0, y: 100.0 });
 
-        let texture2 = rl.load_texture(&thread, bg_path).unwrap();
-        let mut bg = Platformer::new(texture2,Vector2{x:1600.00,y:1600.00});
+        let mut bg = Platformer::new(bg_path.to_string(),Vector2{x:1600.00,y:1600.00});
         bg.set_position(Vector2 { x: 800.0, y: 800.0 });
 
         let camera = Camera2D{
@@ -85,6 +80,23 @@ impl Scene for Level {
         self.previous_ticks = rl.get_time() as f32;
         self.player.reset_position();
         self.camera.target = *self.player.get_position()
+    }
+
+        fn load(&mut self, rl:&mut RaylibHandle, thread:&RaylibThread){
+        self.player.load(rl, thread);
+        self.bg.load(rl, thread);
+
+         for block in &mut self.blocks {
+                block.load(rl, thread);
+            }
+
+            for goal in &mut self.goals {
+                goal.load(rl, thread);
+            }
+
+            for evil in &mut self.evils {
+                evil.load(rl, thread);
+            }
     }
 
     fn get_status(&self) -> AppStatus{
@@ -164,6 +176,9 @@ impl Scene for Level {
 
     fn render(&mut self, rl:&mut RaylibHandle, thread:&RaylibThread){
 
+        println!("one");
+
+
         let mut x_add =  0.0;
         let mut y_add =  0.0; 
         if self.screen_shake > 0.0 {
@@ -173,7 +188,7 @@ impl Scene for Level {
 
 
         let mut d = rl.begin_drawing(thread);
-
+        println!("two");
 
         d.clear_background(Color::WHITE);
         self.camera.target = Vector2 { 
@@ -195,11 +210,17 @@ impl Scene for Level {
         self.camera.target.x += x_add;
         self.camera.target.y += y_add;
 
+        println!("three");
+
         // d.draw_text("Hello, world!", 12, 12, 20, Color::BLACK);
         {
             let mut d_cam = d.begin_mode2D(self.camera);
 
+        println!("four");
+
             self.bg.render(&mut d_cam);
+
+        println!("five");
 
             self.player.render(&mut d_cam);
 

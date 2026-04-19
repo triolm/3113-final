@@ -14,13 +14,13 @@ pub struct Platformer{
     colliding_right : bool,
     sprite: Sprite,
     start_position: Vector2,
-    jump_countdown: f32
+    jump_countdown: f32,
 }
 
 impl Platformer{
 
-    pub fn new(texture: Texture2D, scale: Vector2) -> Platformer{
-        let s = Sprite::new(texture,scale);
+    pub fn new(texture_path:String, scale: Vector2) -> Platformer{
+        let s = Sprite::new(texture_path,scale);
 
         Platformer{
             position : Vector2{x:200.0,y:200.0},
@@ -118,7 +118,8 @@ impl Entity for Platformer{
     fn get_acceleration(&self) -> &Vector2 { &self.acceleration }
     fn get_collider_dimensions(&self) -> &Vector2 { &self.collider_dimensions }
 
-    fn get_sprite(&self) -> &Sprite { &self.sprite }
+    fn get_sprite_mut(&mut self) -> & mut Sprite { &mut self.sprite }
+    fn get_sprite(&self) -> &  Sprite { & self.sprite }
 
     fn is_colliding_top(&self) -> bool { self.colliding_top }
     fn is_colliding_bottom(&self) -> bool { self.colliding_bottom }

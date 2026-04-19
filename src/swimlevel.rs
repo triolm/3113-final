@@ -27,37 +27,32 @@ pub struct SwimLevel {
 }
 
 impl SwimLevel{
-    pub fn add_block(&mut self,  rl:&mut RaylibHandle, thread:&RaylibThread, x:f32, y:f32, w:f32, h:f32, texture_path:&str){
-        let texture = rl.load_texture(thread, &texture_path).unwrap();
-        let mut block = Platformer::new(texture,Vector2{x:w,y:h});
+    pub fn add_block(&mut self, x:f32, y:f32, w:f32, h:f32, texture_path:&str){
+        let mut block = Platformer::new(texture_path.to_string(),Vector2{x:w,y:h});
         block.set_position(Vector2 { x,y });
         self.blocks.push(block);
     }
 
-    pub fn add_goal(&mut self, rl:&mut RaylibHandle, thread:&RaylibThread, x:f32, y:f32, next:u32, texture_path:&str){
-        let texture =rl.load_texture(&thread, &texture_path).unwrap();
-        let mut goal = Goal::new(texture,Vector2{x:50.0,y:50.0});
+    pub fn add_goal(&mut self, x:f32, y:f32, next:u32, texture_path:&str){
+        let mut goal = Goal::new(texture_path.to_string(),Vector2{x:50.0,y:50.0});
         goal.set_position(Vector2 { x,y });
         goal.set_next(next);
         self.goals.push(goal);
     }
 
-    pub fn add_evil(&mut self, rl:&mut RaylibHandle, thread:&RaylibThread, x:f32, y:f32, w:f32, h:f32, texture_path:&str){
-        let texture =rl.load_texture(&thread, &texture_path).unwrap();
-        let mut evil = Murderer::new(texture,Vector2{x:w, y:h});
+    pub fn add_evil(&mut self, x:f32, y:f32, w:f32, h:f32, texture_path:&str){
+        let mut evil = Murderer::new(texture_path.to_string(),Vector2{x:w, y:h});
         evil.set_position(Vector2 { x,y });
         self.evils.push(evil);
     }
 
     pub fn new(rl:&mut RaylibHandle, thread:&RaylibThread, bg_path:&str) -> SwimLevel {
 
-        let texture1 = rl.load_texture(&thread, "assets/blue.png").unwrap();
-        let mut player = Swimmer::new(texture1,Vector2{x:20.0,y:20.00});
+        let mut player = Swimmer::new("assets/blue.png".to_string(),Vector2{x:20.0,y:20.00});
         player.set_start_position(Vector2 { x: 100.0, y: 100.0 });
 
 
-        let texture2 = rl.load_texture(&thread, bg_path).unwrap();
-        let mut bg = Platformer::new(texture2,Vector2{x:1600.00,y:1600.00});
+        let mut bg = Platformer::new(bg_path.to_string(),Vector2{x:1600.00,y:1600.00});
         bg.set_position(Vector2 { x: 800.0, y: 800.0 });
 
         let camera = Camera2D{
@@ -100,6 +95,24 @@ impl Scene for SwimLevel {
         self.player.reset_position();
         self.player.set_acceleration(Vector2 { x: 0.0, y: 50.0 });
         self.camera.target = *self.player.get_position()
+    }
+
+    fn load(&mut self, rl:&mut RaylibHandle, thread:&RaylibThread){
+        self.player.load(rl, thread);
+        self.bg.load(rl, thread);
+
+
+         for block in &mut self.blocks {
+                block.load(rl, thread);
+            }
+
+            for goal in &mut self.goals {
+                goal.load(rl, thread);
+            }
+
+            for evil in &mut self.evils {
+                evil.load(rl, thread);
+            }
     }
     
     fn get_status(&self) -> AppStatus{
@@ -161,22 +174,22 @@ impl Scene for SwimLevel {
             return;
         }
 
-        // for goal in &self.goals{
-        //     if self.player.is_colliding(goal) {
-        //         self.next = goal.get_next() as i32;
-        //     }
-        // }
+        for goal in &self.goals{
+            if self.player.is_colliding(goal) {
+                self.next = goal.get_next() as i32;
+            }
+        }
 
-        // let mut is_dead:bool = false;
-        // for evil in &self.evils{
-        //     if self.player.is_colliding(evil) {
-        //         is_dead = true;
-        //     }
-        // }
-        // if is_dead {
-        //     self.init(rl);
-        //     self.screen_shake = 0.4;
-        // }
+        let mut is_dead:bool = false;
+        for evil in &self.evils{
+            if self.player.is_colliding(evil) {
+                is_dead = true;
+            }
+        }
+        if is_dead {
+            self.init(rl);
+            self.screen_shake = 0.4;
+        }
 
         if self.screen_shake > 0.0 {
             self.screen_shake -= delta_time
@@ -229,17 +242,17 @@ impl Scene for SwimLevel {
 
             self.player.render(&mut sd);
 
-            for block in &self.blocks {
-                block.render(&mut sd);
-            }
+            // for block in &self.blocks {
+            //     block.render(&mut sd);
+            // }
 
-            for goal in &self.goals {
-                goal.render(&mut sd);
-            }
+            // for goal in &self.goals {
+            //     goal.render(&mut sd);
+            // }
 
-            for evil in &self.evils {
-                evil.render(&mut sd);
-            }
+            // for evil in &self.evils {
+            //     evil.render(&mut sd);
+            // }
         }
     }
 }

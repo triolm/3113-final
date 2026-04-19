@@ -20,7 +20,7 @@ pub struct Grappler{
 impl Grappler{
 
 
-    pub fn new(texture: Texture2D, scale: Vector2) -> Grappler{
+    pub fn new(texture: String, scale: Vector2) -> Grappler{
         let s = Sprite::new(texture,scale);
 
         Grappler{
@@ -181,8 +181,9 @@ impl Entity for Grappler{
     fn get_acceleration(&self) -> &Vector2 { &self.acceleration }
     fn get_collider_dimensions(&self) -> &Vector2 { &self.collider_dimensions }
 
-    fn get_sprite(&self) -> & Sprite { &self.sprite }
-
+    fn get_sprite_mut(&mut self) -> & mut Sprite { &mut self.sprite }
+    fn get_sprite(&self) -> &  Sprite { & self.sprite }
+    
     fn is_colliding_top(&self) -> bool { self.colliding_top }
     fn is_colliding_bottom(&self) -> bool { self.colliding_bottom }
     fn is_colliding_left(&self) -> bool { self.colliding_left }

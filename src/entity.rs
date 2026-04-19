@@ -1,7 +1,8 @@
 use raylib::prelude::*;
 
 pub struct Sprite{
-    texture: Texture2D,
+    texture: Option<Texture2D>,
+    texture_path: String,
     scale: Vector2,
     animation_index: i32,
     sprite_sheet_cols: i32,
@@ -9,10 +10,11 @@ pub struct Sprite{
 }
 
 impl Sprite{
-    pub fn new(texture: Texture2D, scale: Vector2) -> Sprite{
+    pub fn new(texture_path:String, scale: Vector2) -> Sprite{
 
         Sprite{
-            texture: texture,
+            texture_path: texture_path,
+            texture: None,
             scale: scale,
             animation_index: 0,
             sprite_sheet_cols: 1,
@@ -20,15 +22,22 @@ impl Sprite{
         }
     }
 
+    fn load(&mut self, rl:&mut RaylibHandle,  thread:&RaylibThread){
+        self.texture = Some(rl.load_texture(&thread, &self.texture_path).unwrap());
+        println!("loaded {}", self.texture_path);
+    }
+
     fn get_texture_area(&self) -> Rectangle{
+        let texture = self.texture.as_ref().unwrap();
+
         let u_coord:f32  = (((self.animation_index % self.sprite_sheet_cols) 
-                            / self.sprite_sheet_cols) * self.texture.width) as f32;
+                            / self.sprite_sheet_cols) * texture.width) as f32;
 
         let v_coord:f32  = (((self.animation_index / self.sprite_sheet_cols) 
-                            / self.sprite_sheet_rows) * self.texture.height) as f32;
+                            / self.sprite_sheet_rows) * texture.height) as f32;
 
-        let slice_width: f32  = (self.texture.width / self.sprite_sheet_cols) as f32;
-        let slice_height: f32 = (self.texture.height / self.sprite_sheet_rows) as f32;
+        let slice_width: f32  = (texture.width / self.sprite_sheet_cols) as f32;
+        let slice_height: f32 = (texture.height / self.sprite_sheet_rows) as f32;
 
         return Rectangle::new( 
             u_coord,     // top-left x-coord
@@ -39,7 +48,8 @@ impl Sprite{
     }
 
     fn get_scale(&self) -> &Vector2{ &self.scale }
-    fn get_texture(&self) -> &Texture2D { &self.texture }
+    fn has_texture(&self) -> bool { !self.texture.is_none()}
+    fn get_texture(&self) -> &Texture2D { &self.texture.as_ref().unwrap() }
 }
 
 
@@ -60,9 +70,14 @@ pub trait Entity: Positioned {
         true
     }
 
+    // i had to ask AI. i don't understand why i had to do htis.
+    fn load(&mut self,rl:&mut RaylibHandle, thread:&RaylibThread) { self.get_sprite_mut().load(rl,thread) }
+
     fn total_mvement(&self) -> Vector2 { *self.get_velocity() }
 
-    fn get_sprite(&self) -> & Sprite;
+
+    fn get_sprite_mut(&mut self) -> &mut Sprite;
+    fn get_sprite(&self) -> &Sprite;
 
     fn is_colliding_top(&self) -> bool;
     fn is_colliding_bottom(&self) -> bool;
@@ -159,7 +174,8 @@ pub trait Entity: Positioned {
             .abs();
 
         if self.total_mvement().x > 0.0 {
-            let mut new_pos = *self.get_position();
+            let mut new_pos = *self
+            .get_position();
             new_pos.x -= x_overlap;
             self.set_position(new_pos);
             self.set_colliding_right(true);
@@ -180,6 +196,7 @@ pub trait Entity: Positioned {
 
     fn _render_sprite(&self, draw: &mut RaylibDrawHandle){
         if !self.is_active() { return; }
+        if !self.get_sprite().has_texture() {return}
         
         //will be centered on position
         let destination_area = Rectangle::new(

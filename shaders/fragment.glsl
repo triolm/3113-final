@@ -14,7 +14,7 @@ in vec2 fragPosition;
 out vec4 finalColor;
 
 // Adjustable attenuation parameters
-const float LINEAR_TERM    = 0.000003; // linear term
+const float LINEAR_TERM    = 0.0003; // linear term
 const float QUADRATIC_TERM = 0.00001; // quadratic term
 const float MIN_BRIGHTNESS = 0.05;    // avoid total darkness
 
@@ -55,7 +55,7 @@ void main()
     vec4 tint2 = vec4(0.0, 0.4, .7,1.0);
 
     vec4 overlay = mix(tint1, tint2, wiggle);
-    vec4 overlayed = mix(overlay, color, attenuate(dist, LINEAR_TERM,QUADRATIC_TERM) * .6);
+    vec4 overlayed = mix(overlay, color, attenuate(dist, LINEAR_TERM,QUADRATIC_TERM) * .5 + 0.1);
 
     finalColor = overlayed;
 }

@@ -16,5 +16,6 @@ pub trait Scene{
 
     fn get_next(&self) -> i32;
     fn init(&mut self, rl:&RaylibHandle);
+    fn load(&mut self, rl:&mut RaylibHandle, thread:&RaylibThread);
 
 }

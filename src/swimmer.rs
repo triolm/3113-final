@@ -18,7 +18,7 @@ pub struct Swimmer{
 
 impl Swimmer{
 
-    pub fn new(texture: Texture2D, scale: Vector2) -> Swimmer{
+    pub fn new(texture: String, scale: Vector2) -> Swimmer{
         let s = Sprite::new(texture,scale);
 
         Swimmer{
@@ -96,7 +96,7 @@ impl Entity for Swimmer{
     fn update_velocity(&mut self, delta_time: f32) {
         self.set_velocity(*self.get_velocity() + (*self.get_acceleration() + self.movement) * delta_time);
         self.velocity.scale(0.99);
-        if(self.velocity.length() > 100.0){
+        if self.velocity.length() > 100.0 {
             self.velocity = self.velocity.normalized().scale_by(100.0);
         }
     }
@@ -121,7 +121,8 @@ impl Entity for Swimmer{
     fn get_acceleration(&self) -> &Vector2 { &self.acceleration }
     fn get_collider_dimensions(&self) -> &Vector2 { &self.collider_dimensions }
 
-    fn get_sprite(&self) -> &Sprite { &self.sprite }
+    fn get_sprite_mut(&mut self) -> & mut Sprite { &mut self.sprite }
+    fn get_sprite(&self) -> &  Sprite { & self.sprite }
 
     fn is_colliding_top(&self) -> bool { self.colliding_top }
     fn is_colliding_bottom(&self) -> bool { self.colliding_bottom }
