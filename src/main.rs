@@ -7,8 +7,11 @@ mod scene;
 mod goal;
 mod murderer;
 mod mariolevel;
+mod swimlevel;
+mod swimmer;
 use level::Level;
 use mariolevel::MarioLevel;
+use swimlevel::SwimLevel;
 use crate::scene::{Scene, AppStatus};
 
 const FPS: u32 = 60;
@@ -142,18 +145,21 @@ fn level_nintendo(rl:&mut RaylibHandle, thread:&RaylibThread) -> Level{
 fn level_mario(rl:&mut RaylibHandle, thread:&RaylibThread) -> MarioLevel{
     let mut level:MarioLevel = MarioLevel::new(rl, thread, "./assets/Page8.png");
 
-    let add: f32 = 20.0;
+    let add: f32 = 00.0;
 
-    level.add_block(rl, thread, 572.0, 665.0 + add, 1000.0, 100.0,  "./assets/blue.png");
-    // level.add_block(rl, thread, 699.0, 475.0 + add, "./assets/grapple.png");
-    // level.add_block(rl, thread, 541.0, 819.0 + add, "./assets/grapple.png");
+    level.add_block(rl, thread, 562.0, 460.0 + add, 1023.0, 25.0,  "./assets/blue.png");
+    level.add_block(rl, thread, 447.0, 261.0 + add, 300.0, 75.0,  "./assets/blue.png");
+    level.add_block(rl, thread, 893.0, 691.0 + add, 743.0, 75.0,  "./assets/blue.png");
+    level.add_block(rl, thread, 414.0, 1040.0 + add, 300.0, 75.0,  "./assets/blue.png");
+    level.add_block(rl, thread, 972.0, 1115.0 + add, 371.0, 75.0,  "./assets/blue.png");
+    level.add_block(rl, thread, 1020.0, 1020.0 + add, 160.0, 150.0,  "./assets/blue.png");
     
-    // level.add_evil(rl, thread, 276.0, 637.0, 450.0, 30.0, "./assets/grapple.png");
+    level.add_goal(rl, thread, 1026.0, 939.0, 1, "./assets/grapple.png");
     // level.add_evil(rl, thread, 303.0, 675.0, 88.0, 30.0, "./assets/grapple.png");
     // level.add_evil(rl, thread, 437.0, 738.0, 450.0, 30.0, "./assets/grapple.png");
 
     // //  game
-    level.add_goal(rl, thread,149.0,677.0, 1, "./assets/horse.jpg");
+    // level.add_goal(rl, thread,149.0,677.0, 1, "./assets/horse.jpg");
 
     level
 }

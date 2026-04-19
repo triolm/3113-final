@@ -60,6 +60,8 @@ pub trait Entity: Positioned {
         true
     }
 
+    fn total_mvement(&self) -> Vector2 { *self.get_velocity() }
+
     fn get_sprite(&self) -> & Sprite;
 
     fn is_colliding_top(&self) -> bool;
@@ -130,7 +132,7 @@ pub trait Entity: Positioned {
             - (other.get_collider_dimensions().y / 2.0))
             .abs();
 
-        if self.get_velocity().y > 0.0 {
+        if self.total_mvement().y > 0.0 {
             let mut new_pos: Vector2 = *self.get_position();
             new_pos.y -= y_overlap;
             self.set_position(new_pos);
@@ -156,7 +158,7 @@ pub trait Entity: Positioned {
             - (other.get_collider_dimensions().x / 2.0))
             .abs();
 
-        if self.get_velocity().x > 0.0 {
+        if self.total_mvement().x > 0.0 {
             let mut new_pos = *self.get_position();
             new_pos.x -= x_overlap;
             self.set_position(new_pos);

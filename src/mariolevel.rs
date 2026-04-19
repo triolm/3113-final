@@ -19,9 +19,6 @@ pub struct MarioLevel {
     next: i32,
     camera: Camera2D,
     screen_shake: f32,
-    render_texture: RenderTexture2D,
-    shader: Shader,
-    light_pos_loc:i32,
 }
 
 impl MarioLevel{
@@ -66,12 +63,9 @@ impl MarioLevel{
             zoom:SCALE
         };
 
-        let render_texture = rl.load_render_texture(&thread, 1200, 675).expect("shader issue");
-        let shader = rl.load_shader(&thread, Some("shaders/vertex.glsl"), Some("shaders/fragment.glsl"));
-        let light_pos_loc = shader.get_shader_location("lightPosition");
+     
 
         MarioLevel {
-            render_texture,
             app_status: AppStatus::Running,
             previous_ticks: 0.0,
             player,
@@ -82,8 +76,6 @@ impl MarioLevel{
             camera,
             bg,
             screen_shake: 0.0,
-            shader,
-            light_pos_loc,
         }
     }
 
@@ -133,15 +125,20 @@ impl Scene for MarioLevel {
         self.previous_ticks  = ticks;
       
         self.player.update(delta_time);
+
         self.player.update_position_x(delta_time);
         for block in &self.blocks{
             self.player.resolve_collision_x(block);
         }
+
         self.player.update_position_y(delta_time);
         for block in &self.blocks{
             self.player.resolve_collision_y(block);
         }
+        
+
         self.player.reset_movement();
+        
 
         if self.player.get_position().x > 1600.0 + 400.0 ||
            self.player.get_position().x < 0.0 - 400.0 ||
@@ -152,28 +149,26 @@ impl Scene for MarioLevel {
             return;
         }
 
-        // for goal in &self.goals{
-        //     if self.player.is_colliding(goal) {
-        //         self.next = goal.get_next() as i32;
-        //     }
-        // }
+        for goal in &self.goals{
+            if self.player.is_colliding(goal) {
+                self.next = goal.get_next() as i32;
+            }
+        }
 
-        // let mut is_dead:bool = false;
-        // for evil in &self.evils{
-        //     if self.player.is_colliding(evil) {
-        //         is_dead = true;
-        //     }
-        // }
-        // if is_dead {
-        //     self.init(rl);
-        //     self.screen_shake = 0.4;
-        // }
+        let mut is_dead:bool = false;
+        for evil in &self.evils{
+            if self.player.is_colliding(evil) {
+                is_dead = true;
+            }
+        }
+        if is_dead {
+            self.init(rl);
+            self.screen_shake = 0.4;
+        }
 
         if self.screen_shake > 0.0 {
             self.screen_shake -= delta_time
         }
-
-
     }
 
 
@@ -208,26 +203,25 @@ impl Scene for MarioLevel {
         self.camera.target.x += x_add;
         self.camera.target.y += y_add;
 
-        // d.draw_text("Hello, world!", 12, 12, 20, Color::BLACK);
+
         {
             let mut d_cam = d.begin_mode2D(self.camera);
-            let mut sd = d_cam.begin_shader_mode(&mut self.shader);
 
-            self.bg.render(&mut sd);
+            self.bg.render(&mut d_cam);
 
-            self.player.render(&mut sd);
+            self.player.render(&mut d_cam);
 
-            for block in &self.blocks {
-                block.render(&mut sd);
-            }
+            // for block in &self.blocks {
+            //     block.render(&mut d_cam);
+            // }
 
-            for goal in &self.goals {
-                goal.render(&mut sd);
-            }
+            // for goal in &self.goals {
+            //     goal.render(&mut d_cam);
+            // }
 
-            for evil in &self.evils {
-                evil.render(&mut sd);
-            }
+            // for evil in &self.evils {
+            //     evil.render(&mut d_cam);
+            // }
         }
     }
 }

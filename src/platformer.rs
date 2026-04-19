@@ -61,7 +61,7 @@ impl Platformer{
         if self.is_colliding_bottom(){
             self.jump_countdown = 0.3;
             let mut vel : Vector2 = *self.get_velocity();
-            vel.y = -600.0;
+            vel.y = -800.0;
             self.set_velocity(vel);
         }
         // println!("{}", self.jump_countdown);
@@ -73,6 +73,8 @@ impl Positioned for Platformer{
 }
 
 impl Entity for Platformer{
+
+    fn total_mvement(&self) -> Vector2 { *self.get_velocity() + self.movement }
 
     fn set_start_position(&mut self, pos: Vector2) { self.start_position = pos }
 
@@ -109,6 +111,7 @@ impl Entity for Platformer{
                                    y: self.get_position().y }
         );
     }
+
 
     // fn get_position(&self) -> &Vector2 { &self.position }
     fn get_velocity(&self) -> &Vector2 { &self.velocity }
