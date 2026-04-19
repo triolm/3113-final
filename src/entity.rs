@@ -48,6 +48,10 @@ pub trait Positioned {
 }
 
 pub trait Entity: Positioned {
+
+    fn set_start_position(&mut self, pos: Vector2);
+    fn reset_position(&mut self);
+
     // fn get_position(&self) -> &Vector2;
     fn get_velocity(&self) -> &Vector2;
     fn get_acceleration(&self) -> &Vector2;

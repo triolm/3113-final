@@ -19,7 +19,6 @@ pub struct Grappler{
 
 impl Grappler{
 
-    pub fn set_start_position(&mut self, pos: Vector2) { self.start_position = pos }
 
     pub fn new(texture: Texture2D, scale: Vector2) -> Grappler{
         let s = Sprite::new(texture,scale);
@@ -57,12 +56,7 @@ impl Grappler{
         self.max_dist = (x_diff.powf(2.0) + y_diff.powf(2.0)).sqrt()
     }
 
-    pub fn reset_position(&mut self){
-        self.velocity = Vector2 { x: 0.0, y: 0.0 };
-        self.acceleration = Vector2 { x: 0.0, y: 0.0 };
-        self.position = self.start_position;
-        self.unset_grapple();
-    }
+
 
     pub fn grapple_closest(&mut self, targets: &[impl Positioned + 'static]) {
         let mut closest_dist: f32 = -1.0;
@@ -100,7 +94,7 @@ impl Grappler{
             }
         );
 
-        if(self.is_grappling()){
+        if self.is_grappling() {
             // i'm not fully sure why i have to do this
             if let Some(ptr) = self.grappled_to {
                 let target_pos = unsafe { (*ptr).get_position() };
@@ -128,8 +122,17 @@ impl Positioned for Grappler{
 
 impl Entity for Grappler{
 
+    fn set_start_position(&mut self, pos: Vector2) { self.start_position = pos }
+
+    fn reset_position(&mut self){
+        self.velocity = Vector2 { x: 0.0, y: 0.0 };
+        self.acceleration = Vector2 { x: 0.0, y: 0.0 };
+        self.position = self.start_position;
+        self.unset_grapple();
+    }
+
     fn render(&self, draw: &mut RaylibDrawHandle){
-         if(self.is_grappling()){
+         if self.is_grappling() {
                 // i'm not fully sure why i have to do this
                 if let Some(ptr) = self.grappled_to {
                     let grapple_pos = unsafe { (*ptr).get_position() };
@@ -140,7 +143,7 @@ impl Entity for Grappler{
     }
 
     fn update(&mut self, delta_time: f32){
-        if(self.is_grappling()){
+        if self.is_grappling() {
             // i'm not fully sure why i have to do this
             if let Some(ptr) = self.grappled_to {
                 let target_pos = unsafe { (*ptr).get_position() };

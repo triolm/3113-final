@@ -18,7 +18,8 @@ pub struct Level {
     evils: Vec<Murderer>,
     goals: Vec<Goal>,
     next: i32,
-    camera: Camera2D
+    camera: Camera2D,
+    screen_shake: f32
 }
 
 impl Level{
@@ -70,20 +71,21 @@ impl Level{
             evils: vec![],
             next: -1,
             camera,
-            bg
+            bg,
+            screen_shake: 0.0
         }
     }
 
-    pub fn init(&mut self, rl:&RaylibHandle) {
+    
+    
+}
+impl Scene for Level {
+    fn init(&mut self, rl:&RaylibHandle) {
         self.next = -1;
         self.previous_ticks = rl.get_time() as f32;
         self.player.reset_position();
         self.camera.target = *self.player.get_position()
     }
-
-
-}
-impl Scene for Level {
 
     fn get_status(&self) -> AppStatus{
         return self.app_status;
@@ -119,11 +121,12 @@ impl Scene for Level {
 
         self.player.update_position(delta_time);
 
-        if self.player.get_position().x > 1600.0 + 400.0 ||
-           self.player.get_position().x < 0.0 - 400.0 ||
+        if self.player.get_position().x > 1600.0 + 100.0 ||
+           self.player.get_position().x < 0.0 - 100.0 ||
            //    self.player.get_position().y < 0.0 ||
-           self.player.get_position().y > 1600.0 + 400.0 {
+           self.player.get_position().y > 1600.0 {
             self.init(rl);
+            self.screen_shake = 0.4;
             return;
         }
 
@@ -141,6 +144,11 @@ impl Scene for Level {
         }
         if is_dead {
             self.init(rl);
+            self.screen_shake = 0.4;
+        }
+
+        if self.screen_shake > 0.0 {
+            self.screen_shake -= delta_time
         }
 
         // self.player.resolve_collision_x(&self.block2);
@@ -155,7 +163,17 @@ impl Scene for Level {
 
 
     fn render(&mut self, rl:&mut RaylibHandle, thread:&RaylibThread){
+
+        let mut x_add =  0.0;
+        let mut y_add =  0.0; 
+        if self.screen_shake > 0.0 {
+            x_add = rl.get_random_value::<i32>(-100..100) as f32 / 20.0 * (self.screen_shake / 0.4);
+            y_add = rl.get_random_value::<i32>(-100..100) as f32 / 20.0 * (self.screen_shake / 0.4);
+        }
+
+
         let mut d = rl.begin_drawing(thread);
+
 
         d.clear_background(Color::WHITE);
         self.camera.target = Vector2 { 
@@ -165,11 +183,17 @@ impl Scene for Level {
             (self.player.get_position().y*0.04+ self.camera.target.y*0.96)
         };
 
+
+
+
         if self.camera.target.x > 1600.0 - (1200.0/2.0)/SCALE { self.camera.target.x = 1600.0 - (1200.0/2.0)/SCALE }
         if self.camera.target.x < (1200.0/2.0)/SCALE { self.camera.target.x = (1200.0/2.0)/SCALE}
 
         if self.camera.target.y > 1600.0 - (675.0/2.0)/SCALE { self.camera.target.y = 1600.0 - (675.0/2.0)/SCALE }
         if self.camera.target.y < (675.0/2.0)/SCALE { self.camera.target.y = (675.0/2.0)/SCALE }
+
+        self.camera.target.x += x_add;
+        self.camera.target.y += y_add;
 
         // d.draw_text("Hello, world!", 12, 12, 20, Color::BLACK);
         {

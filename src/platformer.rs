@@ -1,5 +1,6 @@
 use raylib::prelude::*;
 use crate::entity::{Entity, Positioned, Sprite};
+use noise::{NoiseFn, Perlin, Seedable};
 
 pub struct Platformer{
     position : Vector2,
@@ -12,6 +13,8 @@ pub struct Platformer{
     colliding_left : bool,
     colliding_right : bool,
     sprite: Sprite,
+    start_position: Vector2,
+    jump_countdown: f32
 }
 
 impl Platformer{
@@ -30,6 +33,8 @@ impl Platformer{
             colliding_left : false,
             colliding_right : false,
             sprite: s,
+            start_position : Vector2{x:200.0,y:200.0},
+            jump_countdown: 0.0
         }   
     }
 
@@ -38,26 +43,28 @@ impl Platformer{
     }
 
     pub fn move_left(&mut self){
-        self.movement.x = -100.0;
+        self.movement.x = -300.0;
     }
     pub fn move_right(&mut self){
-        self.movement.x = 100.0;
+        self.movement.x = 300.0;
     }
-    // pub fn move_up(&mut self){
-    //     self.movement.y = -100.0;
-    // }
-    // pub fn move_down(&mut self){
-    //     self.movement.y = 100.0;
-    // }
+    pub fn move_up(&mut self){
+        self.movement.y = -300.0;
+    }
+    pub fn move_down(&mut self){
+        self.movement.y = 300.0;
+    }
 
   
 
     pub fn jump(&mut self){
-        if self.is_colliding_bottom() {
+        if self.is_colliding_bottom(){
+            self.jump_countdown = 0.3;
             let mut vel : Vector2 = *self.get_velocity();
-            vel.y = -500.0;
+            vel.y = -600.0;
             self.set_velocity(vel);
         }
+        // println!("{}", self.jump_countdown);
     }
 }
 
@@ -67,8 +74,22 @@ impl Positioned for Platformer{
 
 impl Entity for Platformer{
 
+    fn set_start_position(&mut self, pos: Vector2) { self.start_position = pos }
+
+    fn reset_position(&mut self){
+        self.velocity = Vector2 { x: 0.0, y: 0.0 };
+        self.acceleration = Vector2 { x: 0.0, y: 0.0 };
+        self.position = self.start_position;
+    }
+
     fn update(&mut self, delta_time: f32){
         // self.reset_movement();
+        self.jump_countdown -= delta_time;
+
+        if self.movement.x > 0.0 && self.movement.y > 0.0 {
+            self.movement.x /= 1.4142135;
+            self.movement.y /= 1.4142135;
+        }
         self.reset_collider_flags();
         self.update_velocity(delta_time);
     }

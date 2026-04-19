@@ -44,7 +44,7 @@ impl Goal{
     }
 
 
-    pub fn update_position(&mut self, delta_time: f32) { }
+    pub fn update_position(&mut self, _delta_time: f32) { }
 
 }
 
@@ -53,12 +53,14 @@ impl Positioned for Goal{
 }
 
 impl Entity for Goal{
+    fn set_start_position(&mut self, _pos: Vector2) {}
+    fn reset_position(&mut self) {}
 
     fn render(&self, draw: &mut RaylibDrawHandle){
         self._render_sprite(draw);
     }
 
-    fn update(&mut self, delta_time: f32){ }
+    fn update(&mut self, _delta_time: f32){ }
 
     fn get_velocity(&self) -> &Vector2 { &self.velocity }
     fn get_acceleration(&self) -> &Vector2 { &self.acceleration }

@@ -32,13 +32,13 @@ impl Murderer{
     }
 
 
-    pub fn jump(&mut self){
-        if self.is_colliding_bottom() {
-            let mut vel : Vector2 = *self.get_velocity();
-            vel.y = -500.0;
-            self.set_velocity(vel);
-        }
-    }
+    // pub fn jump(&mut self){
+    //     if self.is_colliding_bottom() {
+    //         let mut vel : Vector2 = *self.get_velocity();
+    //         vel.y = -500.0;
+    //         self.set_velocity(vel);
+    //     }
+    // }
 }
 
 impl Positioned for Murderer{
@@ -46,6 +46,8 @@ impl Positioned for Murderer{
 }
 
 impl Entity for Murderer{
+    fn set_start_position(&mut self, _pos: Vector2) {}
+    fn reset_position(&mut self) {}
 
     fn update(&mut self, delta_time: f32){
         // self.reset_movement();

@@ -15,4 +15,6 @@ pub trait Scene{
     fn get_status(&self) -> AppStatus;
 
     fn get_next(&self) -> i32;
+    fn init(&mut self, rl:&RaylibHandle);
+
 }
