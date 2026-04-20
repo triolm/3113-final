@@ -8,6 +8,7 @@ mod goal;
 mod murderer;
 mod mariolevel;
 mod swimlevel;
+mod goomba;
 mod swimmer;
 use level::Level;
 use mariolevel::MarioLevel;
@@ -31,8 +32,8 @@ fn main() {
     let mut current_level:usize = 0;
 
     //dummy
-    // levels.push(Box::new(level_mario())); // 1
-    levels.push(Box::new(level_river(&mut rl, &thread))); // 1
+    levels.push(Box::new(level_mario())); // 1
+    // levels.push(Box::new(level_river(&mut rl, &thread))); // 1
     
     
     levels.push(Box::new(level_game())); // 1
@@ -158,10 +159,11 @@ fn level_mario() -> MarioLevel{
     level.add_block(414.0, 1040.0 + add, 300.0, 75.0,  "./assets/blue.png");
     level.add_block(972.0, 1115.0 + add, 371.0, 75.0,  "./assets/blue.png");
     level.add_block(1020.0, 1020.0 + add, 160.0, 150.0,  "./assets/blue.png");
+    level.add_block(265.0, 816.0 + add, 150.0, 75.0,  "./assets/blue.png");
     
     level.add_goal(1026.0, 939.0, 1, "./assets/grapple.png");
-    // level.add_evil(303.0, 675.0, 88.0, 30.0, "./assets/grapple.png");
-    // level.add_evil(437.0, 738.0, 450.0, 30.0, "./assets/grapple.png");
+    level.add_goomba(558.0, 616.0);
+    level.add_goomba(302.0, 965.0);
 
     // //  game
     // level.add_goal(49.0,677.0, 1, "./assets/horse.jpg");

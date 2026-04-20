@@ -175,10 +175,6 @@ impl Scene for Level {
 
 
     fn render(&mut self, rl:&mut RaylibHandle, thread:&RaylibThread){
-
-        println!("one");
-
-
         let mut x_add =  0.0;
         let mut y_add =  0.0; 
         if self.screen_shake > 0.0 {
@@ -188,7 +184,6 @@ impl Scene for Level {
 
 
         let mut d = rl.begin_drawing(thread);
-        println!("two");
 
         d.clear_background(Color::WHITE);
         self.camera.target = Vector2 { 
@@ -197,8 +192,6 @@ impl Scene for Level {
             y: 
             (self.player.get_position().y*0.04+ self.camera.target.y*0.96)
         };
-
-
 
 
         if self.camera.target.x > 1600.0 - (1200.0/2.0)/SCALE { self.camera.target.x = 1600.0 - (1200.0/2.0)/SCALE }
@@ -210,29 +203,23 @@ impl Scene for Level {
         self.camera.target.x += x_add;
         self.camera.target.y += y_add;
 
-        println!("three");
-
         // d.draw_text("Hello, world!", 12, 12, 20, Color::BLACK);
         {
             let mut d_cam = d.begin_mode2D(self.camera);
 
-        println!("four");
-
             self.bg.render(&mut d_cam);
-
-        println!("five");
 
             self.player.render(&mut d_cam);
 
-            for block in &self.blocks {
+            for block in &mut self.blocks {
                 block.render(&mut d_cam);
             }
 
-            for goal in &self.goals {
+            for goal in &mut self.goals {
                 goal.render(&mut d_cam);
             }
 
-            for evil in &self.evils {
+            for evil in &mut self.evils {
                 evil.render(&mut d_cam);
             }
         }

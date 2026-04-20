@@ -56,10 +56,6 @@ impl Entity for Goal{
     fn set_start_position(&mut self, _pos: Vector2) {}
     fn reset_position(&mut self) {}
 
-    fn render(&self, draw: &mut RaylibDrawHandle){
-        self._render_sprite(draw);
-    }
-
     fn update(&mut self, _delta_time: f32){ }
 
     fn get_velocity(&self) -> &Vector2 { &self.velocity }
