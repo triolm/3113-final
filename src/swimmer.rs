@@ -53,18 +53,6 @@ impl Swimmer{
     pub fn move_down(&mut self){
         self.movement.y = 100.0;
     }
-
-  
-
-    pub fn jump(&mut self){
-        if self.is_colliding_bottom(){
-            self.jump_countdown = 0.3;
-            let mut vel : Vector2 = *self.get_velocity();
-            vel.y = -600.0;
-            self.set_velocity(vel);
-        }
-        // println!("{}", self.jump_countdown);
-    }
 }
 
 impl Positioned for Swimmer{

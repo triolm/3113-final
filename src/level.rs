@@ -30,7 +30,7 @@ impl Level{
     }
 
     pub fn add_goal(&mut self, x:f32, y:f32, next:u32, texture_path:&str){
-        let mut goal = Goal::new(texture_path.to_string(),Vector2{x:50.0,y:50.0});
+        let mut goal = Goal::new(texture_path.to_string(),Vector2{x:180.0,y:50.0});
         goal.set_position(Vector2 { x,y });
         goal.set_next(next);
         self.goals.push(goal);

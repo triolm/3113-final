@@ -2,10 +2,9 @@
 use raylib::prelude::*;
 use crate::entity::{Entity, Positioned};
 use crate::platformer::Platformer;
-use crate::goomba::{self, Goomba};
+use crate::goomba::{Goomba};
 use crate::goal::Goal;
 use crate::scene::{Scene, AppStatus};
-use crate::murderer::Murderer;
 
 const SCALE:f32 = 1.2;
 
@@ -124,9 +123,9 @@ impl Scene for MarioLevel {
         // let key = self.rl.get_key_pressed();
         //  self.player.reset_movement();
 
-         if rl.is_key_down(KeyboardKey::KEY_LEFT) { self.player.move_left();}
-         if rl.is_key_down(KeyboardKey::KEY_RIGHT) { self.player.move_right();}
-         if rl.is_key_down(KeyboardKey::KEY_UP) { self.player.jump();}
+         if rl.is_key_down(KeyboardKey::KEY_A) { self.player.move_left();}
+         if rl.is_key_down(KeyboardKey::KEY_D) { self.player.move_right();}
+         if rl.is_key_down(KeyboardKey::KEY_W) { self.player.jump();}
         //  if rl.is_key_down(KeyboardKey::KEY_DOWN) { self.player.move_down();}
          if rl.is_key_down(KeyboardKey::KEY_R) { self.init(rl);}
         //  if self.rl.is_key_down(KeyboardKey::KEY_RIGHT) { self.player.move_right();}

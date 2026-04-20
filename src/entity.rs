@@ -31,7 +31,7 @@ impl Sprite{
 
     pub fn increment_frame(&mut self){
         self.animation_index += 1;
-        self.animation_index %= (self.sprite_sheet_cols * self.sprite_sheet_rows);
+        self.animation_index %=  self.sprite_sheet_cols * self.sprite_sheet_rows ;
     }
 
     fn load(&mut self, rl:&mut RaylibHandle,  thread:&RaylibThread){

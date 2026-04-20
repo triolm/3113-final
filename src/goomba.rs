@@ -43,9 +43,9 @@ impl Goomba{
         }   
     }
 
-    pub fn reset_movement(&mut self){
-        self.movement = Vector2{x:0.0, y:0.0};
-    }
+    // pub fn reset_movement(&mut self){
+    //     self.movement = Vector2{x:0.0, y:0.0};
+    // }
 
     pub fn move_left(&mut self){
         self.movement.x = -100.0;
@@ -53,24 +53,24 @@ impl Goomba{
     pub fn move_right(&mut self){
         self.movement.x = 100.0;
     }
-    pub fn move_up(&mut self){
-        self.movement.y = -100.0;
-    }
-    pub fn move_down(&mut self){
-        self.movement.y = 100.0;
-    }
+    // pub fn move_up(&mut self){
+    //     self.movement.y = -100.0;
+    // }
+    // pub fn move_down(&mut self){
+    //     self.movement.y = 100.0;
+    // }
 
   
 
-    pub fn jump(&mut self){
-        if self.is_colliding_bottom(){
-            self.jump_countdown = 0.3;
-            let mut vel : Vector2 = *self.get_velocity();
-            vel.y = -800.0;
-            self.set_velocity(vel);
-        }
-        // println!("{}", self.jump_countdown);
-    }
+//     pub fn jump(&mut self){
+//         if self.is_colliding_bottom(){
+//             self.jump_countdown = 0.3;
+//             let mut vel : Vector2 = *self.get_velocity();
+//             vel.y = -800.0;
+//             self.set_velocity(vel);
+//         }
+//         // println!("{}", self.jump_countdown);
+//     }
 }
 
 impl Positioned for Goomba{

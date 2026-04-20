@@ -9,6 +9,7 @@ mod murderer;
 mod mariolevel;
 mod swimlevel;
 mod goomba;
+mod shark;
 mod swimmer;
 use level::Level;
 use mariolevel::MarioLevel;
@@ -32,8 +33,8 @@ fn main() {
     let mut current_level:usize = 0;
 
     //dummy
-    levels.push(Box::new(level_mario())); // 1
-    // levels.push(Box::new(level_river(&mut rl, &thread))); // 1
+    // levels.push(Box::new(level_river())); // 1
+    levels.push(Box::new(level_river(&mut rl, &thread))); // 1
     
     
     levels.push(Box::new(level_game())); // 1
@@ -125,7 +126,7 @@ fn level_multiplayer() -> Level{
     level.add_evil(453.0, 647.0, 800.0, 30.0, "./assets/grapple.png");
 
     // video game
-    level.add_goal(53.0,992.0, 3, "./assets/horse.jpg");
+    level.add_goal(353.0,992.0, 3, "./assets/horse.jpg");
 
     level
 }
@@ -144,7 +145,7 @@ fn level_nintendo() -> Level{
     level.add_evil(437.0, 738.0, 450.0, 30.0, "./assets/grapple.png");
 
     //  mario
-    level.add_goal(49.0,677.0, 5, "./assets/horse.jpg");
+    level.add_goal(149.0,677.0, 5, "./assets/horse.jpg");
 
     level
 }
@@ -183,7 +184,8 @@ fn level_river(rl:&mut RaylibHandle, thread:&RaylibThread) -> SwimLevel{
     // level.add_block(1020.0, 1020.0 + add, 160.0, 150.0,  "./assets/blue.png");
     
     level.add_goal(795.0, 1034.0, 1, "./assets/grapple.png");
-    level.add_evil(414.0, 606.0, 722.0, 30.0, "./assets/grapple.png");
+    level.add_evil(100.0, 300.0, 100.0, 500.0, "./assets/grapple.png");
+    // level.add_evil(756.0, 889.0, 722.0, 30.0, "./assets/grapple.png");
     // level.add_evil(437.0, 738.0, 450.0, 30.0, "./assets/grapple.png");
 
     // //  game

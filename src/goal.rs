@@ -43,8 +43,7 @@ impl Goal{
         self.next_scene_index
     }
 
-
-    pub fn update_position(&mut self, _delta_time: f32) { }
+    // pub fn update_position(&mut self, _delta_time: f32) { }
 
 }
 

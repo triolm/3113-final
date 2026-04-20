@@ -4,6 +4,7 @@ use crate::entity::{Entity, Positioned};
 use crate::platformer::Platformer;
 use crate::swimmer::Swimmer;
 use crate::goal::Goal;
+use crate::shark::Shark;
 use crate::scene::{Scene, AppStatus};
 use crate::murderer::Murderer;
 
@@ -15,12 +16,11 @@ pub struct SwimLevel {
     player: Swimmer,
     bg: Platformer,
     blocks: Vec<Platformer>,
-    evils: Vec<Murderer>,
+    evils: Vec<Shark>,
     goals: Vec<Goal>,
     next: i32,
     camera: Camera2D,
     screen_shake: f32,
-    render_texture: RenderTexture2D,
     shader: Shader,
     light_pos_loc:i32,
     time_loc:i32,
@@ -40,9 +40,9 @@ impl SwimLevel{
         self.goals.push(goal);
     }
 
-    pub fn add_evil(&mut self, x:f32, y:f32, w:f32, h:f32, texture_path:&str){
-        let mut evil = Murderer::new(texture_path.to_string(),Vector2{x:w, y:h});
-        evil.set_position(Vector2 { x,y });
+    pub fn add_evil(&mut self, x:f32, y:f32, start:f32, end:f32, texture_path:&str){
+        let mut evil = Shark::new(texture_path.to_string(),Vector2{x:20.0, y:20.0},start, end);
+        evil.set_start_position(Vector2 { x,y });
         self.evils.push(evil);
     }
 
@@ -62,13 +62,11 @@ impl SwimLevel{
             zoom:SCALE
         };
 
-        let render_texture = rl.load_render_texture(&thread, 1200, 675).expect("shader issue");
         let shader = rl.load_shader(&thread, Some("shaders/vertex.glsl"), Some("shaders/fragment.glsl"));
         let light_pos_loc = shader.get_shader_location("lightPosition");
         let time_loc = shader.get_shader_location("time");
 
         SwimLevel {
-            render_texture,
             app_status: AppStatus::Running,
             previous_ticks: 0.0,
             player,
@@ -94,7 +92,10 @@ impl Scene for SwimLevel {
         self.previous_ticks = rl.get_time() as f32;
         self.player.reset_position();
         self.player.set_acceleration(Vector2 { x: 0.0, y: 50.0 });
-        self.camera.target = *self.player.get_position()
+        self.camera.target = *self.player.get_position();
+        for evil in &mut self.evils {
+            evil.move_left();
+        }
     }
 
     fn load(&mut self, rl:&mut RaylibHandle, thread:&RaylibThread){
@@ -102,17 +103,17 @@ impl Scene for SwimLevel {
         self.bg.load(rl, thread);
 
 
-         for block in &mut self.blocks {
-                block.load(rl, thread);
-            }
+        for block in &mut self.blocks {
+            block.load(rl, thread);
+        }
 
-            for goal in &mut self.goals {
-                goal.load(rl, thread);
-            }
+        for goal in &mut self.goals {
+            goal.load(rl, thread);
+        }
 
-            for evil in &mut self.evils {
-                evil.load(rl, thread);
-            }
+        for evil in &mut self.evils {
+            evil.load(rl, thread);
+        }
     }
     
     fn get_status(&self) -> AppStatus{
@@ -181,7 +182,10 @@ impl Scene for SwimLevel {
         }
 
         let mut is_dead:bool = false;
-        for evil in &self.evils{
+        for evil in &mut self.evils{
+            evil.update(delta_time);
+            evil.update_position_x(delta_time);
+            evil.update_position_y(delta_time);
             if self.player.is_colliding(evil) {
                 is_dead = true;
             }
@@ -250,9 +254,9 @@ impl Scene for SwimLevel {
             //     goal.render(&mut sd);
             // }
 
-            // for evil in &self.evils {
-            //     evil.render(&mut sd);
-            // }
+            for evil in &self.evils {
+                evil.render(&mut sd);
+            }
         }
     }
 }

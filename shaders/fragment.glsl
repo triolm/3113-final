@@ -51,11 +51,11 @@ void main()
     float layer3 = (sin((fragPosition.y - fragPosition.x)/35 - 3 * time) - sin(fragPosition.x/30 - 3 * time)) / 4 + 0.5;
     float wiggle = 0.4 * layer1 + 0.4 * layer2 + 0.2 * layer3;
 
-    vec4 tint1 = vec4(0.0, 0.8, .9,1.0);
-    vec4 tint2 = vec4(0.0, 0.4, .7,1.0);
+    vec4 tint1 = vec4(0.0, 0.7, .9,1.0);
+    vec4 tint2 = vec4(0.0, 0.3, .7,1.0);
 
     vec4 overlay = mix(tint1, tint2, wiggle);
-    vec4 overlayed = mix(overlay, color, attenuate(dist, LINEAR_TERM,QUADRATIC_TERM) * .5 + 0.1);
+    vec4 overlayed = mix(overlay, color, attenuate(dist, LINEAR_TERM,QUADRATIC_TERM) * .5 + 0.2);
 
     finalColor = overlayed;
 }

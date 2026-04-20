@@ -1,6 +1,5 @@
 use raylib::prelude::*;
 use crate::entity::{Entity, Positioned, Sprite};
-use noise::{NoiseFn, Perlin, Seedable};
 
 pub struct Platformer{
     position : Vector2,
@@ -48,12 +47,12 @@ impl Platformer{
     pub fn move_right(&mut self){
         self.movement.x = 300.0;
     }
-    pub fn move_up(&mut self){
-        self.movement.y = -300.0;
-    }
-    pub fn move_down(&mut self){
-        self.movement.y = 300.0;
-    }
+    // pub fn move_up(&mut self){
+    //     self.movement.y = -300.0;
+    // }
+    // pub fn move_down(&mut self){
+    //     self.movement.y = 300.0;
+    // }
 
   
 
