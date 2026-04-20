@@ -19,6 +19,8 @@ pub struct MarioLevel {
     next: i32,
     camera: Camera2D,
     screen_shake: f32,
+    screen_shake_v:Vector2,
+
 }
 
 impl MarioLevel{
@@ -38,6 +40,7 @@ impl MarioLevel{
     pub fn add_goomba(&mut self, x:f32, y:f32){
         let mut evil = Goomba::new("assets/goomba.png".to_string(),Vector2{x:75.0, y:75.0});
         evil.set_start_position(Vector2 { x,y });
+        evil.set_position(Vector2 { x,y });
         evil.get_sprite_mut().set_sprite_sheet_cols(2);
         self.goombas.push(evil);
     }
@@ -72,6 +75,8 @@ impl MarioLevel{
             camera,
             bg,
             screen_shake: 0.0,
+            screen_shake_v: Vector2 { x: 0.0, y: 0.0 }, 
+
         }
     }
 
@@ -79,6 +84,7 @@ impl MarioLevel{
     
 }
 impl Scene for MarioLevel {
+
     fn init(&mut self, rl:&RaylibHandle) {
         self.next = -1;
         self.previous_ticks = rl.get_time() as f32;
@@ -204,24 +210,14 @@ impl Scene for MarioLevel {
         }
 
         if self.screen_shake > 0.0 {
-            self.screen_shake -= delta_time
+            self.screen_shake -= delta_time;
+            self.screen_shake_v.x = rl.get_random_value::<i32>(-100..100) as f32 / 20.0 * (self.screen_shake / 0.4);
+            self.screen_shake_v.y = rl.get_random_value::<i32>(-100..100) as f32 / 20.0 * (self.screen_shake / 0.4);
         }
     }
 
 
-    fn render(&mut self, rl:&mut RaylibHandle, thread:&RaylibThread){
-
-        let mut x_add =  0.0;
-        let mut y_add =  0.0; 
-        if self.screen_shake > 0.0 {
-            x_add = rl.get_random_value::<i32>(-100..100) as f32 / 20.0 * (self.screen_shake / 0.4);
-            y_add = rl.get_random_value::<i32>(-100..100) as f32 / 20.0 * (self.screen_shake / 0.4);
-        }
-
-
-        let mut d = rl.begin_drawing(thread);
-
-
+    fn render(&mut self, d:&mut RaylibDrawHandle){
         d.clear_background(Color::WHITE);
         self.camera.target = Vector2 { 
             x: 
@@ -237,8 +233,8 @@ impl Scene for MarioLevel {
         if self.camera.target.y > 1600.0 - (675.0/2.0)/SCALE { self.camera.target.y = 1600.0 - (675.0/2.0)/SCALE }
         if self.camera.target.y < (675.0/2.0)/SCALE { self.camera.target.y = (675.0/2.0)/SCALE }
 
-        self.camera.target.x += x_add;
-        self.camera.target.y += y_add;
+        self.camera.target.x += self.screen_shake_v.x;
+        self.camera.target.y += self.screen_shake_v.y;
 
 
         {

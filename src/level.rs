@@ -14,12 +14,15 @@ pub struct Level {
     previous_ticks: f32,
     player: Grappler,
     bg: Platformer,
+    press_space: Platformer,
     blocks: Vec<Platformer>,
     evils: Vec<Murderer>,
     goals: Vec<Goal>,
     next: i32,
     camera: Camera2D,
-    screen_shake: f32
+    screen_shake: f32,
+    screen_shake_v:Vector2,
+    begun: bool,
 }
 
 impl Level{
@@ -44,8 +47,13 @@ impl Level{
 
     pub fn new(bg_path:&str) -> Level {
 
+        let mut press_space = Platformer::new("assets/Page11.png".to_string(), Vector2{x:1200.0, y:675.0});
+        press_space.set_start_position(Vector2 { x: 1200.0/2.0, y: 675.0/2.0 });
+        press_space.set_position(Vector2 { x: 1200.0/2.0, y: 675.0/2.0 });
+
         let mut player = Grappler::new("assets/blue.png".to_string(),Vector2{x:20.0,y:20.00});
         player.set_start_position(Vector2 { x: 100.0, y: 100.0 });
+        player.set_position(Vector2 { x: 100.0, y: 100.0 });
 
         let mut bg = Platformer::new(bg_path.to_string(),Vector2{x:1600.00,y:1600.00});
         bg.set_position(Vector2 { x: 800.0, y: 800.0 });
@@ -67,7 +75,10 @@ impl Level{
             next: -1,
             camera,
             bg,
-            screen_shake: 0.0
+            screen_shake: 0.0,
+            begun: false,
+            press_space,
+            screen_shake_v: Vector2 { x: 0.0, y: 0.0 }, 
         }
     }
 
@@ -75,28 +86,31 @@ impl Level{
     
 }
 impl Scene for Level {
+
     fn init(&mut self, rl:&RaylibHandle) {
         self.next = -1;
         self.previous_ticks = rl.get_time() as f32;
         self.player.reset_position();
-        self.camera.target = *self.player.get_position()
+        self.camera.target = *self.player.get_position();
     }
 
-        fn load(&mut self, rl:&mut RaylibHandle, thread:&RaylibThread){
+    fn load(&mut self, rl:&mut RaylibHandle, thread:&RaylibThread){
         self.player.load(rl, thread);
         self.bg.load(rl, thread);
+        self.press_space.load(rl, thread);
+        self.begun = false;
 
          for block in &mut self.blocks {
-                block.load(rl, thread);
-            }
+            block.load(rl, thread);
+        }
 
-            for goal in &mut self.goals {
-                goal.load(rl, thread);
-            }
+        for goal in &mut self.goals {
+            goal.load(rl, thread);
+        }
 
-            for evil in &mut self.evils {
-                evil.load(rl, thread);
-            }
+        for evil in &mut self.evils {
+            evil.load(rl, thread);
+        }
     }
 
     fn get_status(&self) -> AppStatus{
@@ -110,6 +124,11 @@ impl Scene for Level {
     fn process_input(&mut self, rl:&RaylibHandle){
         // let key = self.rl.get_key_pressed();
         //  self.player.reset_movement();
+
+        if !self.begun {
+            if rl.is_key_released(KeyboardKey::KEY_SPACE) { self.begun = true; }
+            else { return; }
+        }
 
          if rl.is_key_released(KeyboardKey::KEY_SPACE) { self.player.unset_grapple();}
          if rl.is_key_released(KeyboardKey::KEY_R) { self.init(rl);}
@@ -127,7 +146,10 @@ impl Scene for Level {
         let ticks: f32 =  rl.get_time() as f32;
         let delta_time = ticks - self.previous_ticks;
         self.previous_ticks  = ticks;
-      
+
+        if !self.begun {
+            return;
+        }
         
         self.player.update(delta_time);
 
@@ -160,7 +182,9 @@ impl Scene for Level {
         }
 
         if self.screen_shake > 0.0 {
-            self.screen_shake -= delta_time
+            self.screen_shake -= delta_time;
+            self.screen_shake_v.x = rl.get_random_value::<i32>(-100..100) as f32 / 20.0 * (self.screen_shake / 0.4);
+            self.screen_shake_v.y = rl.get_random_value::<i32>(-100..100) as f32 / 20.0 * (self.screen_shake / 0.4);
         }
 
         // self.player.resolve_collision_x(&self.block2);
@@ -174,18 +198,8 @@ impl Scene for Level {
     }
 
 
-    fn render(&mut self, rl:&mut RaylibHandle, thread:&RaylibThread){
-        let mut x_add =  0.0;
-        let mut y_add =  0.0; 
-        if self.screen_shake > 0.0 {
-            x_add = rl.get_random_value::<i32>(-100..100) as f32 / 20.0 * (self.screen_shake / 0.4);
-            y_add = rl.get_random_value::<i32>(-100..100) as f32 / 20.0 * (self.screen_shake / 0.4);
-        }
-
-
-        let mut d = rl.begin_drawing(thread);
-
-        d.clear_background(Color::WHITE);
+    fn render(&mut self, d: &mut RaylibDrawHandle){
+                d.clear_background(Color::WHITE);
         self.camera.target = Vector2 { 
             x: 
             (self.player.get_position().x*0.04 + self.camera.target.x*0.96), 
@@ -193,6 +207,7 @@ impl Scene for Level {
             (self.player.get_position().y*0.04+ self.camera.target.y*0.96)
         };
 
+      
 
         if self.camera.target.x > 1600.0 - (1200.0/2.0)/SCALE { self.camera.target.x = 1600.0 - (1200.0/2.0)/SCALE }
         if self.camera.target.x < (1200.0/2.0)/SCALE { self.camera.target.x = (1200.0/2.0)/SCALE}
@@ -200,8 +215,8 @@ impl Scene for Level {
         if self.camera.target.y > 1600.0 - (675.0/2.0)/SCALE { self.camera.target.y = 1600.0 - (675.0/2.0)/SCALE }
         if self.camera.target.y < (675.0/2.0)/SCALE { self.camera.target.y = (675.0/2.0)/SCALE }
 
-        self.camera.target.x += x_add;
-        self.camera.target.y += y_add;
+        self.camera.target.x += self.screen_shake_v.x;
+        self.camera.target.y += self.screen_shake_v.y;
 
         // d.draw_text("Hello, world!", 12, 12, 20, Color::BLACK);
         {
@@ -215,13 +230,17 @@ impl Scene for Level {
                 block.render(&mut d_cam);
             }
 
-            for goal in &mut self.goals {
-                goal.render(&mut d_cam);
-            }
+            // for goal in &mut self.goals {
+            //     goal.render(&mut d_cam);
+            // }
 
-            for evil in &mut self.evils {
-                evil.render(&mut d_cam);
-            }
+            // for evil in &mut self.evils {
+            //     evil.render(&mut d_cam);
+            // }
+        }
+
+        if !self.begun {
+            self.press_space.render(d);
         }
     }
 }

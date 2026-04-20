@@ -24,6 +24,8 @@ pub struct SwimLevel {
     shader: Shader,
     light_pos_loc:i32,
     time_loc:i32,
+    screen_shake_v:Vector2,
+
 }
 
 impl SwimLevel{
@@ -43,6 +45,7 @@ impl SwimLevel{
     pub fn add_evil(&mut self, x:f32, y:f32, start:f32, end:f32, texture_path:&str){
         let mut evil = Shark::new(texture_path.to_string(),Vector2{x:20.0, y:20.0},start, end);
         evil.set_start_position(Vector2 { x,y });
+        evil.set_position(Vector2 { x,y });
         self.evils.push(evil);
     }
 
@@ -50,6 +53,7 @@ impl SwimLevel{
 
         let mut player = Swimmer::new("assets/blue.png".to_string(),Vector2{x:20.0,y:20.00});
         player.set_start_position(Vector2 { x: 100.0, y: 100.0 });
+        player.set_position(Vector2 { x: 100.0, y: 100.0 });
 
 
         let mut bg = Platformer::new(bg_path.to_string(),Vector2{x:1600.00,y:1600.00});
@@ -79,7 +83,9 @@ impl SwimLevel{
             screen_shake: 0.0,
             shader,
             light_pos_loc,
-            time_loc
+            time_loc,
+            screen_shake_v: Vector2 { x: 0.0, y: 0.0 }, 
+
         }
     }
 
@@ -97,6 +103,8 @@ impl Scene for SwimLevel {
             evil.move_left();
         }
     }
+
+
 
     fn load(&mut self, rl:&mut RaylibHandle, thread:&RaylibThread){
         self.player.load(rl, thread);
@@ -196,7 +204,9 @@ impl Scene for SwimLevel {
         }
 
         if self.screen_shake > 0.0 {
-            self.screen_shake -= delta_time
+            self.screen_shake -= delta_time;
+            self.screen_shake_v.x = rl.get_random_value::<i32>(-100..100) as f32 / 20.0 * (self.screen_shake / 0.4);
+            self.screen_shake_v.y = rl.get_random_value::<i32>(-100..100) as f32 / 20.0 * (self.screen_shake / 0.4);
         }
 
         self.shader.set_shader_value(self.light_pos_loc, *self.player.get_position());
@@ -206,17 +216,9 @@ impl Scene for SwimLevel {
     }
 
 
-    fn render(&mut self, rl:&mut RaylibHandle, thread:&RaylibThread){
+    fn render(&mut self,d:&mut RaylibDrawHandle){
 
-        let mut x_add =  0.0;
-        let mut y_add =  0.0; 
-        if self.screen_shake > 0.0 {
-            x_add = rl.get_random_value::<i32>(-100..100) as f32 / 20.0 * (self.screen_shake / 0.4);
-            y_add = rl.get_random_value::<i32>(-100..100) as f32 / 20.0 * (self.screen_shake / 0.4);
-        }
-
-
-        let mut d = rl.begin_drawing(thread);
+        // let mut d = rl.begin_drawing(thread);
 
 
         d.clear_background(Color::WHITE);
@@ -234,8 +236,8 @@ impl Scene for SwimLevel {
         if self.camera.target.y > 1600.0 - (675.0/2.0)/SCALE { self.camera.target.y = 1600.0 - (675.0/2.0)/SCALE }
         if self.camera.target.y < (675.0/2.0)/SCALE { self.camera.target.y = (675.0/2.0)/SCALE }
 
-        self.camera.target.x += x_add;
-        self.camera.target.y += y_add;
+        self.camera.target.x += self.screen_shake_v.x;
+        self.camera.target.y += self.screen_shake_v.y;
 
 
         {

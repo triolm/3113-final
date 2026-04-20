@@ -12,11 +12,20 @@ mod goomba;
 mod shark;
 mod swimmer;
 use level::Level;
+use entity::Entity;
+use platformer::Platformer;
 use mariolevel::MarioLevel;
 use swimlevel::SwimLevel;
-use crate::scene::{Scene, AppStatus};
+use crate::{entity::Positioned, scene::{AppStatus, Scene}};
 
 const FPS: u32 = 60;
+
+#[derive(PartialEq, Copy, Clone)]
+enum EffectStatus {
+    RUN,
+    PEAK,
+    NONE
+}
 
 fn main() {
 
@@ -33,33 +42,71 @@ fn main() {
     let mut current_level:usize = 0;
 
     //dummy
-    // levels.push(Box::new(level_river())); // 1
-    levels.push(Box::new(level_river(&mut rl, &thread))); // 1
-    
+    levels.push(Box::new(level_game())); // 1
+    // levels.push(Box::new(level_river(&mut rl, &thread))); // 1
     
     levels.push(Box::new(level_game())); // 1
     levels.push(Box::new(level_multiplayer())); // 2
     levels.push(Box::new(level_video_game())); // 3
     levels.push(Box::new(level_nintendo())); // 4
     levels.push(Box::new(level_mario())); // 5
-
-   
+    levels.push(Box::new(level_river(&mut rl, &thread))); // 6
     
     levels[current_level].load(&mut rl, &thread);
     levels[current_level].init(&rl);
 
-    while levels[current_level].get_status() != AppStatus::Terminated {
+    let mut effect_y = 10000.0;
+    let mut press_space = Platformer::new("assets/blue.png".to_string(), Vector2{x:1200.0, y:700.0});
+    press_space.set_start_position(Vector2 { x: 1200.0/2.0, y: effect_y});
+    press_space.set_position(Vector2 { x: 1200.0/2.0, y: effect_y });
+    press_space.load(&mut rl, &thread);
 
-        if levels[current_level].get_next() != -1 {
-            current_level = levels[current_level].get_next() as usize;
+    
+    let mut effect:EffectStatus = EffectStatus::NONE;
+    let mut next:i32 = -1;
+    let mut init = false;
+
+    while levels[current_level].get_status() != AppStatus::Terminated {
+        if levels[current_level].get_next() != -1 && effect == EffectStatus::NONE {
+            effect = EffectStatus::RUN;
+            next = levels[current_level].get_next();
+            effect_y = -700.0;
+        }
+        
+        if  effect == EffectStatus::PEAK {
+            current_level = next as usize;
             levels[current_level].load(&mut rl, &thread);
-            levels[current_level].init(&rl);
+            effect = EffectStatus::RUN;
         } 
         
-        levels[current_level].process_input(&mut rl);
-        levels[current_level].update(&mut rl);
+        if effect == EffectStatus::NONE {
+            if !init { 
+                levels[current_level].init(&rl); 
+                init = true;
+            } 
+            levels[current_level].process_input(&mut rl);
+            levels[current_level].update(&mut rl);
+        }
 
-        levels[current_level].render(&mut rl, &thread);
+        {
+            let mut d = rl.begin_drawing(&thread);
+
+            levels[current_level].render(&mut d);
+
+             if effect == EffectStatus::RUN{
+                println!("{}", effect_y);
+                effect_y += 40.0;
+                if effect_y < (675.0/2.0) + 20.0 && effect_y > (675.0/2.0) - 20.0 {effect= EffectStatus::PEAK};
+                press_space.set_position(Vector2 { x: press_space.get_position().x, y: effect_y });
+                press_space.render(&mut d);
+                if effect_y > 700.0 * 2.0 { 
+                    effect = EffectStatus::NONE; 
+                    init = false;
+                }
+            }
+
+            
+        }
     }
     
 }
@@ -79,7 +126,7 @@ fn level_game() -> Level{
     level.add_evil(463.0, 581.0, 800.0, 30.0, "./assets/grapple.png");
     
     //esports
-    level.add_goal(845.0,685.0, 1, "./assets/horse.jpg");
+    level.add_goal(845.0,685.0, 6, "./assets/horse.jpg");
     // multiplayer
     level.add_goal(113.0,832.0, 2, "./assets/horse.jpg");
 
