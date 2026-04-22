@@ -16,7 +16,8 @@ pub struct SwimLevel {
     player: Swimmer,
     bg: Platformer,
     blocks: Vec<Platformer>,
-    evils: Vec<Shark>,
+    sharks: Vec<Shark>,
+    evils: Vec<Platformer>,
     goals: Vec<Goal>,
     next: i32,
     camera: Camera2D,
@@ -42,8 +43,14 @@ impl SwimLevel{
         self.goals.push(goal);
     }
 
+    pub fn add_shark(&mut self, x:f32, y:f32, start:f32, end:f32, texture_path:&str){
+        let mut shark = Shark::new(texture_path.to_string(),Vector2{x:20.0, y:20.0},start, end);
+        shark.set_start_position(Vector2 { x,y });
+        shark.set_position(Vector2 { x,y });
+        self.sharks.push(shark);
+    }
     pub fn add_evil(&mut self, x:f32, y:f32, start:f32, end:f32, texture_path:&str){
-        let mut evil = Shark::new(texture_path.to_string(),Vector2{x:20.0, y:20.0},start, end);
+        let mut evil = Platformer::new(texture_path.to_string(),Vector2{x:start, y:end});
         evil.set_start_position(Vector2 { x,y });
         evil.set_position(Vector2 { x,y });
         self.evils.push(evil);
@@ -77,6 +84,7 @@ impl SwimLevel{
             blocks: vec![],
             goals: vec![],
             evils: vec![],
+            sharks: vec![],
             next: -1,
             camera,
             bg,
@@ -97,10 +105,10 @@ impl Scene for SwimLevel {
         self.next = -1;
         self.previous_ticks = rl.get_time() as f32;
         self.player.reset_position();
-        self.player.set_acceleration(Vector2 { x: 0.0, y: 50.0 });
+        self.player.set_acceleration(Vector2 { x: 0.0, y: 80.0 });
         self.camera.target = *self.player.get_position();
-        for evil in &mut self.evils {
-            evil.move_left();
+        for shark in &mut self.sharks {
+            shark.move_left();
         }
     }
 
@@ -113,6 +121,10 @@ impl Scene for SwimLevel {
 
         for block in &mut self.blocks {
             block.load(rl, thread);
+        }
+
+        for shark in &mut self.sharks {
+            shark.load(rl, thread);
         }
 
         for goal in &mut self.goals {
@@ -174,10 +186,10 @@ impl Scene for SwimLevel {
         self.player.reset_movement();
         
 
-        if self.player.get_position().x > 1600.0 + 400.0 ||
-           self.player.get_position().x < 0.0 - 400.0 ||
+        if self.player.get_position().x > 1600.0 + 000.0 ||
+           self.player.get_position().x < 0.0 - 000.0 ||
            //    self.player.get_position().y < 0.0 ||
-           self.player.get_position().y > 1600.0 + 400.0 {
+           self.player.get_position().y > 1600.0 + 000.0 {
             self.init(rl);
             self.screen_shake = 0.4;
             return;
@@ -190,10 +202,16 @@ impl Scene for SwimLevel {
         }
 
         let mut is_dead:bool = false;
+        for shark in &mut self.sharks{
+            shark.update(delta_time);
+            shark.update_position_x(delta_time);
+            shark.update_position_y(delta_time);
+            if self.player.is_colliding(shark) {
+                is_dead = true;
+            }
+        }
+
         for evil in &mut self.evils{
-            evil.update(delta_time);
-            evil.update_position_x(delta_time);
-            evil.update_position_y(delta_time);
             if self.player.is_colliding(evil) {
                 is_dead = true;
             }
@@ -256,8 +274,12 @@ impl Scene for SwimLevel {
             //     goal.render(&mut sd);
             // }
 
-            for evil in &self.evils {
-                evil.render(&mut sd);
+            // for evil in &self.evils {
+            //     evil.render(&mut sd);
+            // }
+
+            for shark in &self.sharks {
+                shark.render(&mut sd);
             }
         }
     }

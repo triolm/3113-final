@@ -199,8 +199,18 @@ impl Scene for MarioLevel {
         }
 
         let mut is_dead:bool = false;
-        for goomba in &self.goombas{
-            if self.player.is_colliding(goomba) {
+        for goomba in & mut self.goombas{
+            if !self.player.is_colliding(goomba) { continue; }
+            
+            if self.player.get_position().y < goomba.get_position().y &&
+                self.player.get_position().x < goomba.get_position().x + goomba.get_collider_dimensions().x / 2.0 &&
+                self.player.get_position().x > goomba.get_position().x - goomba.get_collider_dimensions().x / 2.0
+            {
+                goomba.set_position(Vector2 { x: -999999.0, y: -999999.0 });
+                self.player.set_colliding_bottom(true);
+                self.player.jump();
+
+            } else {
                 is_dead = true;
             }
         }

@@ -48,10 +48,10 @@ impl Swimmer{
         self.movement.x = 200.0;
     }
     pub fn move_up(&mut self){
-        self.movement.y = -100.0;
+        self.movement.y = -200.0;
     }
     pub fn move_down(&mut self){
-        self.movement.y = 100.0;
+        self.movement.y = 200.0;
     }
 }
 
@@ -84,8 +84,8 @@ impl Entity for Swimmer{
     fn update_velocity(&mut self, delta_time: f32) {
         self.set_velocity(*self.get_velocity() + (*self.get_acceleration() + self.movement) * delta_time);
         self.velocity.scale(0.99);
-        if self.velocity.length() > 100.0 {
-            self.velocity = self.velocity.normalized().scale_by(100.0);
+        if self.velocity.length() > 120.0 {
+            self.velocity = self.velocity.normalized().scale_by(120.0);
         }
     }
 

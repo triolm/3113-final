@@ -42,8 +42,8 @@ fn main() {
     let mut current_level:usize = 0;
 
     //dummy
-    levels.push(Box::new(level_game())); // 1
-    // levels.push(Box::new(level_river(&mut rl, &thread))); // 1
+    levels.push(Box::new(level_mario())); // 1
+    // levels.push(Box::new(level_tuna(&mut rl, &thread))); // 1
     
     levels.push(Box::new(level_game())); // 1
     levels.push(Box::new(level_multiplayer())); // 2
@@ -51,6 +51,8 @@ fn main() {
     levels.push(Box::new(level_nintendo())); // 4
     levels.push(Box::new(level_mario())); // 5
     levels.push(Box::new(level_river(&mut rl, &thread))); // 6
+    levels.push(Box::new(level_fish(&mut rl, &thread))); // 7
+    levels.push(Box::new(level_tuna(&mut rl, &thread))); // 8
     
     levels[current_level].load(&mut rl, &thread);
     levels[current_level].init(&rl);
@@ -67,15 +69,13 @@ fn main() {
     let mut init = false;
 
     while levels[current_level].get_status() != AppStatus::Terminated {
-        if levels[current_level].get_next() != -1 && effect == EffectStatus::NONE {
-            effect = EffectStatus::RUN;
-            next = levels[current_level].get_next();
-            effect_y = -700.0;
-        }
+       
         
         if  effect == EffectStatus::PEAK {
             current_level = next as usize;
             levels[current_level].load(&mut rl, &thread);
+            // for aesthetic purposes....
+            levels[current_level].init(&rl); 
             effect = EffectStatus::RUN;
         } 
         
@@ -88,13 +88,19 @@ fn main() {
             levels[current_level].update(&mut rl);
         }
 
+         if levels[current_level].get_next() != -1 && effect == EffectStatus::NONE {
+            effect = EffectStatus::RUN;
+            next = levels[current_level].get_next();
+            effect_y = -700.0;
+        }
+
         {
             let mut d = rl.begin_drawing(&thread);
 
             levels[current_level].render(&mut d);
 
              if effect == EffectStatus::RUN{
-                println!("{}", effect_y);
+                // println!("{}", effect_y);
                 effect_y += 40.0;
                 if effect_y < (675.0/2.0) + 20.0 && effect_y > (675.0/2.0) - 20.0 {effect= EffectStatus::PEAK};
                 press_space.set_position(Vector2 { x: press_space.get_position().x, y: effect_y });
@@ -189,7 +195,7 @@ fn level_nintendo() -> Level{
     
     level.add_evil(276.0, 637.0, 450.0, 30.0, "./assets/grapple.png");
     level.add_evil(303.0, 675.0, 88.0, 30.0, "./assets/grapple.png");
-    level.add_evil(437.0, 738.0, 450.0, 30.0, "./assets/grapple.png");
+    level.add_evil(437.0, 738.0, 280.0, 30.0, "./assets/grapple.png");
 
     //  mario
     level.add_goal(149.0,677.0, 5, "./assets/horse.jpg");
@@ -206,7 +212,7 @@ fn level_mario() -> MarioLevel{
     level.add_block(893.0, 691.0 + add, 743.0, 75.0,  "./assets/blue.png");
     level.add_block(414.0, 1040.0 + add, 300.0, 75.0,  "./assets/blue.png");
     level.add_block(972.0, 1115.0 + add, 371.0, 75.0,  "./assets/blue.png");
-    level.add_block(1020.0, 1020.0 + add, 160.0, 150.0,  "./assets/blue.png");
+    level.add_block(1020.0, 1020.0 + add, 100.0, 150.0,  "./assets/blue.png");
     level.add_block(265.0, 816.0 + add, 150.0, 75.0,  "./assets/blue.png");
     
     level.add_goal(1026.0, 939.0, 1, "./assets/grapple.png");
@@ -226,17 +232,62 @@ fn level_river(rl:&mut RaylibHandle, thread:&RaylibThread) -> SwimLevel{
     level.add_block(290.0 - 50.0, 297.0 + add, 480.0 + 100.0, 25.0,  "./assets/blue.png");
     level.add_block(686.0 + 50.0, 459.0 + add, 683.0 + 100.0, 25.0,  "./assets/blue.png");
     // level.add_block(558.0+ 100.0, 889.0 + add, 781.0 + 200.0, 25.0,  "./assets/blue.png");
-    level.add_block(517.0, 1077.0 + add, 1000.0, 25.0,  "./assets/blue.png");
-    level.add_block(1057.0, 800.0 + add, 25.0, 2000.0,  "./assets/blue.png");
+    level.add_block(517.0, 1077.0 + add, 2100.0, 25.0,  "./assets/blue.png");
+    level.add_block(1057.0, 800.0 + add, 25.0, 2100.0,  "./assets/blue.png");
     // level.add_block(1020.0, 1020.0 + add, 160.0, 150.0,  "./assets/blue.png");
     
-    level.add_goal(795.0, 1034.0, 1, "./assets/grapple.png");
-    level.add_evil(100.0, 300.0, 100.0, 500.0, "./assets/grapple.png");
-    // level.add_evil(756.0, 889.0, 722.0, 30.0, "./assets/grapple.png");
-    // level.add_evil(437.0, 738.0, 450.0, 30.0, "./assets/grapple.png");
+    //fish
+    level.add_goal(795.0, 1034.0, 7, "./assets/grapple.png");
+    // level.add_evil(100.0, 300.0, 100.0, 500.0, "./assets/grapple.png");
+    level.add_evil(756.0, 889.0, 386.0, 30.0, "./assets/grapple.png");
+    level.add_evil(412.0, 606.0, 722.0, 30.0, "./assets/grapple.png");
 
-    // //  game
-    // level.add_goal(49.0,677.0, 1, "./assets/horse.jpg");
+
+    level
+}
+fn level_fish(rl:&mut RaylibHandle, thread:&RaylibThread) -> SwimLevel{
+    let mut level:SwimLevel = SwimLevel::new(rl, thread, "./assets/Page10.png");
+
+
+    level.add_block(59.0, 662.0, 25.0, 830.0,  "./assets/blue.png");
+    level.add_block(471.0, 567.0, 25.0, 634.0,  "./assets/blue.png");
+    level.add_block(752.0 + 50.0, 567.0, 544.0 + 100.0, 25.0,  "./assets/blue.png");
+    level.add_block(573.0, 1107.0, 1043.0, 25.0,  "./assets/blue.png");
+    level.add_block(1057.0, 800.0, 25.0, 2000.0,  "./assets/blue.png");
+    
+    // tuna
+    level.add_goal(770.0, 597.0, 8, "./assets/grapple.png");
+
+    level.add_evil(167.0, 407.0 + 10.0, 216.0, 20.0, "./assets/grapple.png");
+    level.add_evil(368.0, 597.0 + 10.0, 187.0, 20.0, "./assets/grapple.png");
+
+    level.add_shark(110.0, 837.0, 110.0, 422.0, "./assets/grapple.png");
+    level.add_shark(500.0, 837.0, 500.0, 1000.0, "./assets/grapple.png");
+    level.add_shark(500.0, 763.0, 500.0, 1000.0, "./assets/grapple.png");
+
+    level
+}
+fn level_tuna(rl:&mut RaylibHandle, thread:&RaylibThread) -> SwimLevel{
+    let mut level:SwimLevel = SwimLevel::new(rl, thread, "./assets/Page12.png");
+
+
+    level.add_block(1057.0, 800.0, 25.0, 2000.0,  "./assets/blue.png");
+    level.add_block(382.0 - 50.0, 418.0, 665.0 + 110.0, 25.0,  "./assets/blue.png");
+    level.add_block(642.0, 605.0, 904.0, 25.0,  "./assets/blue.png");
+    level.add_block(204.0, 719.0 - 20.0, 25.0, 160.0 + 40.0,  "./assets/blue.png");
+    
+    // game
+    level.add_goal(367.0, 752.0, 1, "./assets/grapple.png");
+
+    level.add_evil(488.0, 524.0, 302.0, 20.0, "./assets/grapple.png");
+
+    level.add_shark(265.0, 811.0, 265.0, 500.0, "./assets/grapple.png");
+    level.add_shark(500.0, 855.0, 265.0, 500.0, "./assets/grapple.png");
+    level.add_shark(265.0, 900.0, 265.0, 500.0, "./assets/grapple.png");
+
+    level.add_shark(500.0, 811.0, 500.0, 1000.0, "./assets/grapple.png");
+    level.add_shark(1000.0, 855.0, 500.0, 1000.0, "./assets/grapple.png");
+    level.add_shark(500.0, 900.0, 500.0, 1000.0, "./assets/grapple.png");
 
     level
 }
