@@ -14,6 +14,8 @@ pub struct Platformer{
     sprite: Sprite,
     start_position: Vector2,
     jump_countdown: f32,
+    frame_counter: f32,
+
 }
 
 impl Platformer{
@@ -33,7 +35,9 @@ impl Platformer{
             colliding_right : false,
             sprite: s,
             start_position : Vector2{x:200.0,y:200.0},
-            jump_countdown: 0.0
+            jump_countdown: 0.0,
+            frame_counter: 0.0,
+
         }   
     }
 
@@ -44,8 +48,9 @@ impl Platformer{
     pub fn move_left(&mut self){
         self.movement.x = -300.0;
     }
-    pub fn move_right(&mut self){
-        self.movement.x = 300.0;
+    pub fn move_right(&mut self){        
+        self.movement.x = 300.0;    
+
     }
     // pub fn move_up(&mut self){
     //     self.movement.y = -300.0;
@@ -91,8 +96,40 @@ impl Entity for Platformer{
             self.movement.x /= 1.4142135;
             self.movement.y /= 1.4142135;
         }
+        if self.get_sprite().get_sprite_sheet_cols() > 1 {
+            if self.is_colliding_bottom() {
+                if self.movement.x < 0.0 {
+                    self.sprite.set_start_index(6);
+                    self.sprite.set_end_index(9);
+                }
+                else if self.movement.x > 0.0 {
+                    self.sprite.set_start_index(3);
+                    self.sprite.set_end_index(6);
+                } else{
+                    self.sprite.set_start_index(0);
+                    self.sprite.set_end_index(1);
+                }
+                
+            } else {
+                if self.movement.x < 0.0 {
+                    self.sprite.set_start_index(2);
+                    self.sprite.set_end_index(3);
+                } else {
+                    self.sprite.set_start_index(1);
+                    self.sprite.set_end_index(2);
+                }
+            }
+        }
+
         self.reset_collider_flags();
         self.update_velocity(delta_time);
+
+         self.frame_counter += delta_time;
+        if self.frame_counter > 0.2 { 
+            self.get_sprite_mut().increment_frame(); 
+            self.frame_counter = 0.0;
+        }
+
     }
 
       fn update_position_y(&mut self, delta_time: f32) {

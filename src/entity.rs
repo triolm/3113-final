@@ -6,7 +6,9 @@ pub struct Sprite{
     scale: Vector2,
     animation_index: i32,
     sprite_sheet_cols: i32,
-    sprite_sheet_rows: i32
+    sprite_sheet_rows: i32,
+    start_index: i32,
+    end_index: i32,
 }
 
 impl Sprite{
@@ -18,7 +20,9 @@ impl Sprite{
             scale: scale,
             animation_index: 0,
             sprite_sheet_cols: 1,
-            sprite_sheet_rows: 1
+            sprite_sheet_rows: 1,
+            start_index: 0,
+            end_index: 1,
         }
     }
 
@@ -29,9 +33,23 @@ impl Sprite{
         self.sprite_sheet_rows = rows;
     }
 
+    pub fn get_sprite_sheet_cols(&self) -> i32{
+        self.sprite_sheet_cols
+    }
+    pub fn get_sprite_sheet_rows(&self) -> i32{
+        self.sprite_sheet_rows
+    }
+
+    pub fn set_start_index(&mut self, s:i32){
+        self.start_index = s;
+    }
+    pub fn set_end_index(&mut self, e:i32){
+        self.end_index = e;
+    }
+
     pub fn increment_frame(&mut self){
         self.animation_index += 1;
-        self.animation_index %=  self.sprite_sheet_cols * self.sprite_sheet_rows ;
+        self.animation_index %=  self.end_index - self.start_index;
     }
 
     fn load(&mut self, rl:&mut RaylibHandle,  thread:&RaylibThread){
@@ -42,10 +60,12 @@ impl Sprite{
     fn get_texture_area(&self) -> Rectangle{
         let texture = self.texture.as_ref().unwrap();
 
-        let u_coord:f32  = (((self.animation_index % self.sprite_sheet_cols) as f32
+        let frame = self.animation_index + self.start_index;
+
+        let u_coord:f32  = (((frame % self.sprite_sheet_cols) as f32
                             / self.sprite_sheet_cols as f32) * texture.width as f32) as f32;
 
-        let v_coord:f32  = (((self.animation_index / self.sprite_sheet_cols) as f32
+        let v_coord:f32  = (((frame / self.sprite_sheet_cols) as f32
                             / self.sprite_sheet_rows as f32) * texture.height as f32) as f32;
 
         let slice_width: f32  = (texture.width / self.sprite_sheet_cols) as f32;

@@ -23,6 +23,7 @@ pub struct Level {
     screen_shake: f32,
     screen_shake_v:Vector2,
     begun: bool,
+    sound_index: i32,
 }
 
 impl Level{
@@ -33,7 +34,7 @@ impl Level{
     }
 
     pub fn add_goal(&mut self, x:f32, y:f32, next:u32, texture_path:&str){
-        let mut goal = Goal::new(texture_path.to_string(),Vector2{x:180.0,y:50.0});
+        let mut goal = Goal::new(texture_path.to_string(),Vector2{x:180.0,y:30.0});
         goal.set_position(Vector2 { x,y });
         goal.set_next(next);
         self.goals.push(goal);
@@ -79,6 +80,7 @@ impl Level{
             begun: false,
             press_space,
             screen_shake_v: Vector2 { x: 0.0, y: 0.0 }, 
+            sound_index: -1
         }
     }
 
@@ -161,6 +163,7 @@ impl Scene for Level {
            self.player.get_position().y > 1600.0 {
             self.init(rl);
             self.screen_shake = 0.4;
+            self.sound_index = 0;
             return;
         }
 
@@ -178,6 +181,7 @@ impl Scene for Level {
         }
         if is_dead {
             self.init(rl);
+            self.sound_index = 0;
             self.screen_shake = 0.4;
         }
 
@@ -197,6 +201,16 @@ impl Scene for Level {
 
     }
 
+    fn get_sound(&mut self) -> i32 {
+        let sound_index = self.sound_index;
+        self.sound_index = -1;
+        return sound_index;
+    }
+
+
+    fn get_music(&self) ->i32 {
+        return 0;
+    }
 
     fn render(&mut self, d: &mut RaylibDrawHandle){
                 d.clear_background(Color::WHITE);
@@ -230,13 +244,13 @@ impl Scene for Level {
                 block.render(&mut d_cam);
             }
 
-            // for goal in &mut self.goals {
-            //     goal.render(&mut d_cam);
-            // }
+            for goal in &mut self.goals {
+                goal.render(&mut d_cam);
+            }
 
-            // for evil in &mut self.evils {
-            //     evil.render(&mut d_cam);
-            // }
+            for evil in &mut self.evils {
+                evil.render(&mut d_cam);
+            }
         }
 
         if !self.begun {

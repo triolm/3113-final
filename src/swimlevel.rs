@@ -26,6 +26,7 @@ pub struct SwimLevel {
     light_pos_loc:i32,
     time_loc:i32,
     screen_shake_v:Vector2,
+    sound_index:i32,
 
 }
 
@@ -93,7 +94,7 @@ impl SwimLevel{
             light_pos_loc,
             time_loc,
             screen_shake_v: Vector2 { x: 0.0, y: 0.0 }, 
-
+            sound_index: -1,
         }
     }
 
@@ -108,6 +109,7 @@ impl Scene for SwimLevel {
         self.player.set_acceleration(Vector2 { x: 0.0, y: 80.0 });
         self.camera.target = *self.player.get_position();
         for shark in &mut self.sharks {
+            shark.reset_position();
             shark.move_left();
         }
     }
@@ -142,6 +144,12 @@ impl Scene for SwimLevel {
 
     fn get_next(&self) -> i32 {
         self.next
+    }
+
+    fn get_sound(&mut self) -> i32 {
+        let sound_index = self.sound_index;
+        self.sound_index = -1;
+        return sound_index;
     }
 
     fn process_input(&mut self, rl:&RaylibHandle){
@@ -191,6 +199,7 @@ impl Scene for SwimLevel {
            //    self.player.get_position().y < 0.0 ||
            self.player.get_position().y > 1600.0 + 000.0 {
             self.init(rl);
+            self.sound_index = 5;
             self.screen_shake = 0.4;
             return;
         }
@@ -218,6 +227,7 @@ impl Scene for SwimLevel {
         }
         if is_dead {
             self.init(rl);
+            self.sound_index = 5;
             self.screen_shake = 0.4;
         }
 
@@ -232,6 +242,11 @@ impl Scene for SwimLevel {
 
 
     }
+
+    fn get_music(&self) ->i32 {
+        return 2;
+    }
+
 
 
     fn render(&mut self,d:&mut RaylibDrawHandle){

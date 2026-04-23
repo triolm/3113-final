@@ -20,10 +20,12 @@ pub struct MarioLevel {
     camera: Camera2D,
     screen_shake: f32,
     screen_shake_v:Vector2,
-
+    sound_index: i32,
+    prev_key: KeyboardKey,
 }
 
 impl MarioLevel{
+
     pub fn add_block(&mut self, x:f32, y:f32, w:f32, h:f32, texture_path:&str){
         let mut block = Platformer::new(texture_path.to_string(),Vector2{x:w,y:h});
         block.set_position(Vector2 { x,y });
@@ -31,7 +33,7 @@ impl MarioLevel{
     }
 
     pub fn add_goal(&mut self, x:f32, y:f32, next:u32, texture_path:&str){
-        let mut goal = Goal::new(texture_path.to_string(),Vector2{x:50.0,y:50.0});
+        let mut goal = Goal::new(texture_path.to_string(),Vector2{x:100.0,y:50.0});
         goal.set_position(Vector2 { x,y });
         goal.set_next(next);
         self.goals.push(goal);
@@ -42,13 +44,16 @@ impl MarioLevel{
         evil.set_start_position(Vector2 { x,y });
         evil.set_position(Vector2 { x,y });
         evil.get_sprite_mut().set_sprite_sheet_cols(2);
+        evil.get_sprite_mut().set_end_index(2);
         self.goombas.push(evil);
     }
 
     pub fn new(bg_path:&str) -> MarioLevel {
 
-        let mut player = Platformer::new("assets/blue.png".to_string(),Vector2{x:20.0,y:20.00});
+        let mut player = Platformer::new("assets/mariosheet.png".to_string(),Vector2{x:75.0,y:75.00});
         player.set_start_position(Vector2 { x: 100.0, y: 100.0 });
+        player.get_sprite_mut().set_sprite_sheet_cols(3);
+        player.get_sprite_mut().set_sprite_sheet_rows(3);
         // player.set_acceleration(Vector2 { x: 0.0, y: 400.0 });
 
 
@@ -76,7 +81,8 @@ impl MarioLevel{
             bg,
             screen_shake: 0.0,
             screen_shake_v: Vector2 { x: 0.0, y: 0.0 }, 
-
+            sound_index: -1,
+            prev_key: KeyboardKey::KEY_APOSTROPHE, // don't ask please
         }
     }
 
@@ -98,6 +104,16 @@ impl Scene for MarioLevel {
         }
 
         self.camera.target = *self.player.get_position()
+    }
+
+    fn get_music(&self) ->i32 {
+        return 1;
+    }
+
+    fn get_sound(&mut self) -> i32 {
+        let sound_index = self.sound_index;
+        self.sound_index = -1;
+        return sound_index;
     }
 
     fn load(&mut self, rl:&mut RaylibHandle, thread:&RaylibThread){
@@ -128,10 +144,18 @@ impl Scene for MarioLevel {
     fn process_input(&mut self, rl:&RaylibHandle){
         // let key = self.rl.get_key_pressed();
         //  self.player.reset_movement();
+        // if self.player.is_colliding_bottom() {
+            if rl.is_key_down(KeyboardKey::KEY_A) {self.prev_key = KeyboardKey::KEY_A}
+            else if rl.is_key_down(KeyboardKey::KEY_D) {self.prev_key = KeyboardKey::KEY_D}
+            else {self.prev_key = KeyboardKey::KEY_B}
+        // }
 
-         if rl.is_key_down(KeyboardKey::KEY_A) { self.player.move_left();}
-         if rl.is_key_down(KeyboardKey::KEY_D) { self.player.move_right();}
-         if rl.is_key_down(KeyboardKey::KEY_W) { self.player.jump();}
+         if self.prev_key == KeyboardKey::KEY_A { self.player.move_left();}
+         if self.prev_key == KeyboardKey::KEY_D { self.player.move_right();}
+         if rl.is_key_down(KeyboardKey::KEY_W) { 
+            self.player.jump();
+            self.sound_index = 1;
+        }
         //  if rl.is_key_down(KeyboardKey::KEY_DOWN) { self.player.move_down();}
          if rl.is_key_down(KeyboardKey::KEY_R) { self.init(rl);}
         //  if self.rl.is_key_down(KeyboardKey::KEY_RIGHT) { self.player.move_right();}
@@ -188,12 +212,14 @@ impl Scene for MarioLevel {
            //    self.player.get_position().y < 0.0 ||
            self.player.get_position().y > 1600.0 + 400.0 {
             self.init(rl);
+            self.sound_index = 2;
             self.screen_shake = 0.4;
             return;
         }
 
         for goal in &self.goals{
             if self.player.is_colliding(goal) {
+                self.sound_index = 4;
                 self.next = goal.get_next() as i32;
             }
         }
@@ -207,6 +233,7 @@ impl Scene for MarioLevel {
                 self.player.get_position().x > goomba.get_position().x - goomba.get_collider_dimensions().x / 2.0
             {
                 goomba.set_position(Vector2 { x: -999999.0, y: -999999.0 });
+                self.sound_index = 3;
                 self.player.set_colliding_bottom(true);
                 self.player.jump();
 
@@ -216,6 +243,7 @@ impl Scene for MarioLevel {
         }
         if is_dead {
             self.init(rl);
+            self.sound_index = 2;
             self.screen_shake = 0.4;
         }
 

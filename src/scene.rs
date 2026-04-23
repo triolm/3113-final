@@ -18,5 +18,11 @@ pub trait Scene{
     fn init(&mut self, rl:&RaylibHandle);
     fn load(&mut self, rl:&mut RaylibHandle, thread:&RaylibThread);
 
+    fn get_sound(&mut self) ->i32{
+        return -1;
+    }
+    fn get_music(&self) ->i32{
+        return -1;
+    }
 
 }

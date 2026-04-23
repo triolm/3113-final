@@ -37,13 +37,31 @@ fn main() {
         
     rl.set_target_fps(FPS);
 
+
+    let audio = RaylibAudio::init_audio_device().expect("oh no");
     
+    audio.set_master_volume(0.0);
+
     let mut levels: Vec<Box<dyn Scene>> = vec![];
     let mut current_level:usize = 0;
+    
+    let mut sounds: Vec<Sound> = vec![];
+    sounds.push(audio.new_sound("assets/die.mp3").expect("oh no")); //0
+    sounds.push(audio.new_sound("assets/mariojump.mp3").expect("oh no"));//1
+    sounds.push(audio.new_sound("assets/smb_mariodie.wav").expect("oh no"));
+    sounds.push(audio.new_sound("assets/smb_stomp.wav").expect("oh no"));
+    sounds.push(audio.new_sound("assets/smb_pipe.wav").expect("oh no"));
+    sounds.push(audio.new_sound("assets/waterdie.mp3").expect("oh no"));
+    
+    let mut musics: Vec<Music> = vec![];
+    musics.push(audio.new_music("assets/lesbaricades.mp3").expect("oh no"));
+    musics.push(audio.new_music("assets/mario.mp3").expect("oh no"));
+    musics.push(audio.new_music("assets/water.mp3").expect("oh no"));
+    musics[1].set_volume(0.7);
 
     //dummy
     levels.push(Box::new(level_mario())); // 1
-    // levels.push(Box::new(level_tuna(&mut rl, &thread))); // 1
+    // levels.push(Box::new(level_mario(&mut rl, &thread))); // 1
     
     levels.push(Box::new(level_game())); // 1
     levels.push(Box::new(level_multiplayer())); // 2
@@ -53,9 +71,14 @@ fn main() {
     levels.push(Box::new(level_river(&mut rl, &thread))); // 6
     levels.push(Box::new(level_fish(&mut rl, &thread))); // 7
     levels.push(Box::new(level_tuna(&mut rl, &thread))); // 8
+    levels.push(Box::new(level_esports())); // 9
     
     levels[current_level].load(&mut rl, &thread);
     levels[current_level].init(&rl);
+    let mut music_index = levels[current_level].get_music();
+    if music_index != -1 {
+        musics[music_index as usize].play_stream();
+    }
 
     let mut effect_y = 10000.0;
     let mut press_space = Platformer::new("assets/blue.png".to_string(), Vector2{x:1200.0, y:700.0});
@@ -74,6 +97,15 @@ fn main() {
         if  effect == EffectStatus::PEAK {
             current_level = next as usize;
             levels[current_level].load(&mut rl, &thread);
+            
+            let prev_music = music_index;
+            music_index = levels[current_level].get_music();
+            if music_index != -1 && music_index != prev_music { 
+                musics[music_index as usize].play_stream(); 
+                musics[music_index as usize].seek_stream(0.0); 
+            }
+
+
             // for aesthetic purposes....
             levels[current_level].init(&rl); 
             effect = EffectStatus::RUN;
@@ -86,6 +118,10 @@ fn main() {
             } 
             levels[current_level].process_input(&mut rl);
             levels[current_level].update(&mut rl);
+            let sound_index = levels[current_level].get_sound();
+            if sound_index != -1 {
+                sounds[sound_index as usize].play();
+            }
         }
 
          if levels[current_level].get_next() != -1 && effect == EffectStatus::NONE {
@@ -96,8 +132,8 @@ fn main() {
 
         {
             let mut d = rl.begin_drawing(&thread);
-
             levels[current_level].render(&mut d);
+            if music_index != -1 { musics[music_index as usize].update_stream(); }
 
              if effect == EffectStatus::RUN{
                 // println!("{}", effect_y);
@@ -110,8 +146,6 @@ fn main() {
                     init = false;
                 }
             }
-
-            
         }
     }
     
@@ -132,7 +166,7 @@ fn level_game() -> Level{
     level.add_evil(463.0, 581.0, 800.0, 30.0, "./assets/grapple.png");
     
     //esports
-    level.add_goal(845.0,685.0, 6, "./assets/horse.jpg");
+    level.add_goal(845.0,685.0, 9, "./assets/horse.jpg");
     // multiplayer
     level.add_goal(113.0,832.0, 2, "./assets/horse.jpg");
 
@@ -199,6 +233,29 @@ fn level_nintendo() -> Level{
 
     //  mario
     level.add_goal(149.0,677.0, 5, "./assets/horse.jpg");
+
+    level
+}
+
+fn level_esports() -> Level{
+    let mut level:Level = Level::new("./assets/Page7.png");
+
+    let add: f32 = 20.0;
+
+    level.add_block(252.0, 403.0 + add, "./assets/grapple.png");
+    level.add_block(637.0, 441.0 + add, "./assets/grapple.png");
+    level.add_block(745.0, 752.0 + add, "./assets/grapple.png");
+    level.add_block(640.0, 1083.0 + add, "./assets/grapple.png");
+    level.add_block(359.0, 897.0 + add, "./assets/grapple.png");
+    
+    level.add_evil(282.0, 670.0, 461.0, 30.0, "./assets/grapple.png");
+    level.add_evil(292.0, 751.0, 484.0, 25.0, "./assets/grapple.png");
+    level.add_evil(443.0, 789.0, 46.0, 30.0, "./assets/grapple.png");
+    level.add_evil(442.0, 859.0, 74.0, 30.0, "./assets/grapple.png");
+    level.add_evil(475.0, 895.0, 84.0, 30.0, "./assets/grapple.png");
+
+    //  fish
+    level.add_goal(228.0,781.0, 7, "./assets/horse.jpg");
 
     level
 }
