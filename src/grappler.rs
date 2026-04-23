@@ -69,7 +69,7 @@ impl Grappler{
             
             // i don't wait it to grapply smth behind it but like maybe it needs to
             if (i.get_position().x - self.position.x)* self.velocity.x < 0.0{
-                dist *= 3.0;
+                dist *= 2.0;
             }
             
             if closest_dist < 0.0 || dist < closest_dist {
@@ -94,6 +94,17 @@ impl Grappler{
             }
         );
 
+        if self.velocity.x > 0.0 {
+            self.sprite.set_start_index(1);
+            self.sprite.set_end_index(2);
+        } else {
+            self.sprite.set_start_index(3);
+            self.sprite.set_end_index(4);
+        }
+
+        self.sprite.set_angle((self.velocity.y.atan2(self.velocity.x) * 57.2958 - 90.0)/4.0);
+
+        
         if self.is_grappling() {
             // i'm not fully sure why i have to do this
             if let Some(ptr) = self.grappled_to {
@@ -108,7 +119,17 @@ impl Grappler{
                 correct.x *= correction;
                 correct.y *= correction;
                 
-                self.set_position(Vector2{x:self.get_position().x - correct.x, y: self.get_position().y-correct.y})
+                self.set_position(Vector2{x:self.get_position().x - correct.x, y: self.get_position().y-correct.y});
+
+                if self.velocity.x > 0.0 {
+                    self.sprite.set_start_index(0);
+                    self.sprite.set_end_index(1);
+                    self.sprite.set_angle(y_diff.atan2(x_diff) * 57.2958 - 90.0);
+                } else {
+                    self.sprite.set_start_index(2);
+                    self.sprite.set_end_index(3);
+                    self.sprite.set_angle(y_diff.atan2(x_diff) * 57.2958 - 90.0);
+                }
             }
         }
 
@@ -136,7 +157,10 @@ impl Entity for Grappler{
                 // i'm not fully sure why i have to do this
                 if let Some(ptr) = self.grappled_to {
                     let grapple_pos = unsafe { (*ptr).get_position() };
-                    draw.draw_line_ex(self.position, grapple_pos, 1.5, Color::BLACK);
+                    let dir = (*grapple_pos - self.position).normalized();
+                    let point = self.position + (dir * 20.0);
+
+                    draw.draw_line_ex(point, grapple_pos, 1.5, Color::BLACK);
             }
         }
         self._render_sprite(draw);

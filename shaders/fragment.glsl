@@ -38,6 +38,13 @@ float caustics(vec2 uv) {
 
 void main()
 {
+    vec4 first = texture(texture0, fragTexCoord);
+    if(first.a < 0.5) {
+        finalColor = first;
+        return;
+    }
+
+
     vec2 distorted = fragTexCoord;
     distorted.y += sin(time + distorted.x * 30)/1500;
     distorted.x += sin(time + distorted.y * 30)/1500;

@@ -13,7 +13,9 @@ pub struct Swimmer{
     colliding_right : bool,
     sprite: Sprite,
     start_position: Vector2,
-    jump_countdown: f32
+    jump_countdown: f32,
+    frame_counter: f32,
+
 }
 
 impl Swimmer{
@@ -33,13 +35,15 @@ impl Swimmer{
             colliding_right : false,
             sprite: s,
             start_position : Vector2{x:200.0,y:200.0},
-            jump_countdown: 0.0
+            jump_countdown: 0.0,
+            frame_counter: 0.0,
         }   
     }
 
     pub fn reset_movement(&mut self){
         self.movement = Vector2{x:0.0, y:0.0};
     }
+
 
     pub fn move_left(&mut self){
         self.movement.x = -200.0;
@@ -69,6 +73,9 @@ impl Entity for Swimmer{
         self.position = self.start_position;
     }
 
+    fn total_mvement(&self) -> Vector2 { *self.get_velocity() }
+
+
     fn update(&mut self, delta_time: f32){
         // self.reset_movement();
         self.jump_countdown -= delta_time;
@@ -77,9 +84,25 @@ impl Entity for Swimmer{
             self.movement.x /= 1.4142135;
             self.movement.y /= 1.4142135;
         }
+
+        if self.velocity.x > 0.0 {
+            self.sprite.set_start_index(0);
+            self.sprite.set_end_index(4);
+        } else {
+            self.sprite.set_start_index(4);
+            self.sprite.set_end_index(8);
+        }
+
+        self.frame_counter += delta_time;
+        if self.frame_counter > 0.2 && (self.movement.x.abs() > 0.1 || self.movement.y.abs() > 0.1) { 
+            self.get_sprite_mut().increment_frame(); 
+            self.frame_counter = 0.0;
+        }
+
         self.reset_collider_flags();
         self.update_velocity(delta_time);
     }
+
 
     fn update_velocity(&mut self, delta_time: f32) {
         self.set_velocity(*self.get_velocity() + (*self.get_acceleration() + self.movement) * delta_time);

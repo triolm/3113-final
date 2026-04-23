@@ -40,7 +40,7 @@ fn main() {
 
     let audio = RaylibAudio::init_audio_device().expect("oh no");
     
-    audio.set_master_volume(0.0);
+    // audio.set_master_volume(0.0);
 
     let mut levels: Vec<Box<dyn Scene>> = vec![];
     let mut current_level:usize = 0;
@@ -60,8 +60,8 @@ fn main() {
     musics[1].set_volume(0.7);
 
     //dummy
-    levels.push(Box::new(level_mario())); // 1
-    // levels.push(Box::new(level_mario(&mut rl, &thread))); // 1
+    // levels.push(Box::new(level_mario())); // 1
+    levels.push(Box::new(level_fish(&mut rl, &thread))); // 1
     
     levels.push(Box::new(level_game())); // 1
     levels.push(Box::new(level_multiplayer())); // 2
@@ -72,6 +72,10 @@ fn main() {
     levels.push(Box::new(level_fish(&mut rl, &thread))); // 7
     levels.push(Box::new(level_tuna(&mut rl, &thread))); // 8
     levels.push(Box::new(level_esports())); // 9
+    levels.push(Box::new(level_americas())); // 10
+    levels.push(Box::new(level_food())); // 11
+    levels.push(Box::new(level_urban())); // 12
+    levels.push(Box::new(level_plan())); // 13
     
     levels[current_level].load(&mut rl, &thread);
     levels[current_level].init(&rl);
@@ -254,8 +258,8 @@ fn level_esports() -> Level{
     level.add_evil(442.0, 859.0, 74.0, 30.0, "./assets/grapple.png");
     level.add_evil(475.0, 895.0, 84.0, 30.0, "./assets/grapple.png");
 
-    //  fish
-    level.add_goal(228.0,781.0, 7, "./assets/horse.jpg");
+    //  americas
+    level.add_goal(228.0,781.0, 10, "./assets/horse.jpg");
 
     level
 }
@@ -307,7 +311,7 @@ fn level_fish(rl:&mut RaylibHandle, thread:&RaylibThread) -> SwimLevel{
 
 
     level.add_block(59.0, 662.0, 25.0, 830.0,  "./assets/blue.png");
-    level.add_block(471.0, 567.0, 25.0, 634.0,  "./assets/blue.png");
+    level.add_block(471.0, 570.0, 25.0, 634.0,  "./assets/blue.png");
     level.add_block(752.0 + 50.0, 567.0, 544.0 + 100.0, 25.0,  "./assets/blue.png");
     level.add_block(573.0, 1107.0, 1043.0, 25.0,  "./assets/blue.png");
     level.add_block(1057.0, 800.0, 25.0, 2000.0,  "./assets/blue.png");
@@ -318,9 +322,9 @@ fn level_fish(rl:&mut RaylibHandle, thread:&RaylibThread) -> SwimLevel{
     level.add_evil(167.0, 407.0 + 10.0, 216.0, 20.0, "./assets/grapple.png");
     level.add_evil(368.0, 597.0 + 10.0, 187.0, 20.0, "./assets/grapple.png");
 
-    level.add_shark(110.0, 837.0, 110.0, 422.0, "./assets/grapple.png");
-    level.add_shark(500.0, 837.0, 500.0, 1000.0, "./assets/grapple.png");
-    level.add_shark(500.0, 763.0, 500.0, 1000.0, "./assets/grapple.png");
+    level.add_shark(110.0 + 50.0, 837.0, 110.0 + 50.0, 422.0 - 50.0, "./assets/shork.png");
+    level.add_shark(500.0 + 50.0, 837.0, 500.0 + 50.0, 1000.0 - 50.0, "./assets/shork.png");
+    level.add_shark(500.0 + 50.0, 763.0, 500.0 + 50.0, 1000.0 - 50.0, "./assets/shork.png");
 
     level
 }
@@ -333,18 +337,112 @@ fn level_tuna(rl:&mut RaylibHandle, thread:&RaylibThread) -> SwimLevel{
     level.add_block(642.0, 605.0, 904.0, 25.0,  "./assets/blue.png");
     level.add_block(204.0, 719.0 - 20.0, 25.0, 160.0 + 40.0,  "./assets/blue.png");
     
-    // game
-    level.add_goal(367.0, 752.0, 1, "./assets/grapple.png");
+    // food
+    level.add_goal(367.0, 752.0, 11, "./assets/grapple.png");
 
     level.add_evil(488.0, 524.0, 302.0, 20.0, "./assets/grapple.png");
 
-    level.add_shark(265.0, 811.0, 265.0, 500.0, "./assets/grapple.png");
-    level.add_shark(500.0, 855.0, 265.0, 500.0, "./assets/grapple.png");
-    level.add_shark(265.0, 900.0, 265.0, 500.0, "./assets/grapple.png");
+    level.add_shark(265.0 + 50.0, 811.0, 265.0 + 50.0, 500.0 - 50.0, "./assets/shork.png");
+    level.add_shark(500.0 + 50.0, 855.0, 265.0 + 50.0, 500.0 - 50.0, "./assets/shork.png");
+    level.add_shark(265.0 + 50.0, 900.0, 265.0 + 50.0, 500.0 - 50.0, "./assets/shork.png");
 
-    level.add_shark(500.0, 811.0, 500.0, 1000.0, "./assets/grapple.png");
-    level.add_shark(1000.0, 855.0, 500.0, 1000.0, "./assets/grapple.png");
-    level.add_shark(500.0, 900.0, 500.0, 1000.0, "./assets/grapple.png");
+    level.add_shark(500.0 + 50.0, 811.0, 500.0 + 50.0, 1000.0 - 50.0, "./assets/shork.png");
+    level.add_shark(1000.0 + 50.0, 855.0, 500.0 + 50.0, 1000.0 - 50.0, "./assets/shork.png");
+    level.add_shark(500.0 + 50.0, 900.0, 500.0 + 50.0, 1000.0 - 50.0, "./assets/shork.png");
+
+    level
+}
+
+fn level_americas() -> Level{
+    let mut level:Level = Level::new("./assets/Page 13.png");
+
+    let add: f32 = 20.0;
+
+    level.add_block(285.0, 335.0 + add, "./assets/grapple.png");
+    level.add_block(702.0, 335.0 + add, "./assets/grapple.png");
+    level.add_block(732.0, 604.0 + add, "./assets/grapple.png");
+    level.add_block(598.0, 825.0 + add, "./assets/grapple.png");
+    
+    level.add_evil(374.0, 606.0, 53.0, 30.0, "./assets/grapple.png");
+    level.add_evil(371.0, 644.0, 51.0, 30.0, "./assets/grapple.png");
+    level.add_evil(579.0, 604.0, 49.0, 30.0, "./assets/grapple.png");
+    level.add_evil(577.0, 644.0, 35.0, 30.0, "./assets/grapple.png");
+
+    //  river
+    level.add_goal(435.0,604.0, 6, "./assets/horse.jpg");
+
+    level
+}
+
+fn level_food() -> Level{
+    let mut level:Level = Level::new("./assets/Page 14.png");
+
+    let add: f32 = 20.0;
+
+    level.add_block(252.0, 254.0 + add, "./assets/grapple.png");
+    level.add_block(602.0, 521.0 + add, "./assets/grapple.png");
+    level.add_block(328.0, 792.0 + add, "./assets/grapple.png");
+    
+    level.add_evil(285.0, 480.0, 468.0, 30.0, "./assets/grapple.png");
+    level.add_evil(801.0, 830.0, 526.0, 30.0, "./assets/grapple.png");
+
+    //  urban
+    level.add_goal(915.0,949.0, 12, "./assets/horse.jpg");
+
+    level
+}
+fn level_urban() -> Level{
+    let mut level:Level = Level::new("./assets/Page 15.png");
+
+    let add: f32 = 20.0;
+
+    level.add_block(307.0, 254.0 + add, "./assets/grapple.png");
+    level.add_block(92.0, 684.0 + add, "./assets/grapple.png");
+    level.add_block(285.0, 1077.0 + add, "./assets/grapple.png");
+    level.add_block(722.0, 1075.0 + add, "./assets/grapple.png");
+    level.add_block(801.0, 768.0 + add, "./assets/grapple.png");
+    
+    level.add_evil(57.0, 644.0, 20.0, 797.0, "./assets/grapple.png");
+    level.add_evil(433.0, 644.0, 20.0, 797.0, "./assets/grapple.png");
+    level.add_evil(796.0, 996.0, 351.0, 20.0, "./assets/grapple.png");
+
+    //  plan
+    level.add_goal(792.0,956.0, 13, "./assets/horse.jpg");
+
+    level
+}
+fn level_plan() -> Level{
+    let mut level:Level = Level::new("./assets/Page 16.png");
+
+    let add: f32 = 20.0;
+
+    level.add_block(260.0, 255.0 + add, "./assets/grapple.png");
+    level.add_block(651.0, 255.0 + add, "./assets/grapple.png");
+    level.add_block(537.0, 660.0 + add, "./assets/grapple.png");
+    
+    level.add_evil(390.0, 498.0, 679.0, 22.0, "./assets/grapple.png");
+    level.add_evil(797.0, 458.0, 531.0, 22.0, "./assets/grapple.png");
+
+    //  river
+    level.add_goal(182.0,842.0, 6, "./assets/horse.jpg");
+
+    level
+}
+fn level_suburb() -> Level{
+    let mut level:Level = Level::new("./assets/Page 17.png");
+
+    let add: f32 = 20.0;
+
+    level.add_block(277.0, 293.0 + add, "./assets/grapple.png");
+    level.add_block(583.0, 416.0 + add, "./assets/grapple.png");
+    level.add_block(718.0, 771.0 + add, "./assets/grapple.png");
+    level.add_block(718.0, 1116.0 + add, "./assets/grapple.png");
+    
+    level.add_evil(403.0, 578.0, 705.0, 22.0, "./assets/grapple.png");
+    level.add_evil(301.0, 997.0, 501.0, 22.0, "./assets/grapple.png");
+
+    //  river
+    level.add_goal(85.0,1157.0, 6, "./assets/horse.jpg");
 
     level
 }

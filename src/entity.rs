@@ -9,6 +9,7 @@ pub struct Sprite{
     sprite_sheet_rows: i32,
     start_index: i32,
     end_index: i32,
+    angle: f32,
 }
 
 impl Sprite{
@@ -23,8 +24,10 @@ impl Sprite{
             sprite_sheet_rows: 1,
             start_index: 0,
             end_index: 1,
+            angle:0.0,
         }
     }
+
 
     pub fn set_sprite_sheet_cols(&mut self, cols:i32){
         self.sprite_sheet_cols = cols;
@@ -32,6 +35,15 @@ impl Sprite{
     pub fn set_sprite_sheet_rows(&mut self, rows:i32){
         self.sprite_sheet_rows = rows;
     }
+
+    pub fn set_angle(&mut self, angle:f32){
+        self.angle = angle;
+    }
+
+    pub fn get_angle(&self) -> f32{
+        self.angle
+    }
+
 
     pub fn get_sprite_sheet_cols(&self) -> i32{
         self.sprite_sheet_cols
@@ -172,12 +184,15 @@ pub trait Entity: Positioned {
         if !self.is_colliding(other) {
             return;
         }
-
+        
+        
         let y_dist: f32 = (self.get_position().y - other.get_position().y).abs();
-        let y_overlap: f32 = (y_dist
-            - (self.get_collider_dimensions().y / 2.0)
-            - (other.get_collider_dimensions().y / 2.0))
-            .abs();
+        let x_dist: f32 = (self.get_position().x - other.get_position().x).abs();
+     
+        let x_overlap = (self.get_collider_dimensions().x + other.get_collider_dimensions().x) / 2.0 - x_dist;
+        let y_overlap = (self.get_collider_dimensions().y + other.get_collider_dimensions().y) / 2.0 - y_dist;
+
+        if x_overlap < y_overlap { return; }
 
         if self.total_mvement().y > 0.0 {
             let mut new_pos: Vector2 = *self.get_position();
@@ -199,15 +214,16 @@ pub trait Entity: Positioned {
             return;
         }
 
+        let y_dist: f32 = (self.get_position().y - other.get_position().y).abs();
         let x_dist: f32 = (self.get_position().x - other.get_position().x).abs();
-        let x_overlap: f32 = (x_dist
-            - (self.get_collider_dimensions().x / 2.0)
-            - (other.get_collider_dimensions().x / 2.0))
-            .abs();
+     
+        let x_overlap = (self.get_collider_dimensions().x + other.get_collider_dimensions().x) / 2.0 - x_dist;
+        let y_overlap = (self.get_collider_dimensions().y + other.get_collider_dimensions().y) / 2.0 - y_dist;
+
+        if x_overlap > y_overlap { return; }
 
         if self.total_mvement().x > 0.0 {
-            let mut new_pos = *self
-            .get_position();
+            let mut new_pos = *self.get_position();
             new_pos.x -= x_overlap;
             self.set_position(new_pos);
             self.set_colliding_right(true);
@@ -244,11 +260,13 @@ pub trait Entity: Positioned {
             y:self.get_sprite().get_scale().y / 2.0
         };
 
+        // println!("{}", self.get_sprite().get_angle());
+
         // Render the texture on screen
         draw.draw_texture_pro(
             self.get_sprite().get_texture(), 
             self.get_sprite().get_texture_area(), destination_area, origin_offset,
-            0.0, Color::WHITE
+            self.get_sprite().get_angle(), Color::WHITE
         );
 
         // displayCollider();

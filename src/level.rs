@@ -52,9 +52,11 @@ impl Level{
         press_space.set_start_position(Vector2 { x: 1200.0/2.0, y: 675.0/2.0 });
         press_space.set_position(Vector2 { x: 1200.0/2.0, y: 675.0/2.0 });
 
-        let mut player = Grappler::new("assets/blue.png".to_string(),Vector2{x:20.0,y:20.00});
+        let mut player = Grappler::new("assets/stick.png".to_string(),Vector2{x:609.0/12.0,y:741.00/12.0});
         player.set_start_position(Vector2 { x: 100.0, y: 100.0 });
         player.set_position(Vector2 { x: 100.0, y: 100.0 });
+        player.get_sprite_mut().set_sprite_sheet_rows(2);
+        player.get_sprite_mut().set_sprite_sheet_cols(2);
 
         let mut bg = Platformer::new(bg_path.to_string(),Vector2{x:1600.00,y:1600.00});
         bg.set_position(Vector2 { x: 800.0, y: 800.0 });
@@ -244,13 +246,13 @@ impl Scene for Level {
                 block.render(&mut d_cam);
             }
 
-            for goal in &mut self.goals {
-                goal.render(&mut d_cam);
-            }
+            // for goal in &mut self.goals {
+            //     goal.render(&mut d_cam);
+            // }
 
-            for evil in &mut self.evils {
-                evil.render(&mut d_cam);
-            }
+            // for evil in &mut self.evils {
+            //     evil.render(&mut d_cam);
+            // }
         }
 
         if !self.begun {

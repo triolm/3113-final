@@ -6,7 +6,6 @@ use crate::swimmer::Swimmer;
 use crate::goal::Goal;
 use crate::shark::Shark;
 use crate::scene::{Scene, AppStatus};
-use crate::murderer::Murderer;
 
 const SCALE:f32 = 1.2;
 
@@ -38,15 +37,16 @@ impl SwimLevel{
     }
 
     pub fn add_goal(&mut self, x:f32, y:f32, next:u32, texture_path:&str){
-        let mut goal = Goal::new(texture_path.to_string(),Vector2{x:50.0,y:50.0});
+        let mut goal = Goal::new(texture_path.to_string(),Vector2{x:150.0,y:20.0});
         goal.set_position(Vector2 { x,y });
         goal.set_next(next);
         self.goals.push(goal);
     }
 
     pub fn add_shark(&mut self, x:f32, y:f32, start:f32, end:f32, texture_path:&str){
-        let mut shark = Shark::new(texture_path.to_string(),Vector2{x:20.0, y:20.0},start, end);
+        let mut shark = Shark::new(texture_path.to_string(),Vector2{x:1015.0/12.0, y:259.0/6.0},start, end);
         shark.set_start_position(Vector2 { x,y });
+        shark.get_sprite_mut().set_sprite_sheet_cols(2);
         shark.set_position(Vector2 { x,y });
         self.sharks.push(shark);
     }
@@ -59,9 +59,12 @@ impl SwimLevel{
 
     pub fn new(rl:&mut RaylibHandle, thread:&RaylibThread, bg_path:&str) -> SwimLevel {
 
-        let mut player = Swimmer::new("assets/blue.png".to_string(),Vector2{x:20.0,y:20.00});
+        let mut player = Swimmer::new("assets/swim.png".to_string(),Vector2{x:1304.0/24.0,y:342.0/12.0});
         player.set_start_position(Vector2 { x: 100.0, y: 100.0 });
+        player.get_sprite_mut().set_sprite_sheet_cols(4);
+        player.get_sprite_mut().set_sprite_sheet_rows(2);
         player.set_position(Vector2 { x: 100.0, y: 100.0 });
+
 
 
         let mut bg = Platformer::new(bg_path.to_string(),Vector2{x:1600.00,y:1600.00});
@@ -180,16 +183,17 @@ impl Scene for SwimLevel {
       
         self.player.update(delta_time);
 
+        self.player.update_position_y(delta_time);
+        for block in &self.blocks{
+            self.player.resolve_collision_y(block);
+        }
+
+
         self.player.update_position_x(delta_time);
         for block in &self.blocks{
             self.player.resolve_collision_x(block);
         }
 
-        self.player.update_position_y(delta_time);
-        for block in &self.blocks{
-            self.player.resolve_collision_y(block);
-        }
-        
 
         self.player.reset_movement();
         
@@ -281,17 +285,17 @@ impl Scene for SwimLevel {
 
             self.player.render(&mut sd);
 
-            // for block in &self.blocks {
-            //     block.render(&mut sd);
-            // }
+            for block in &self.blocks {
+                block.render(&mut sd);
+            }
 
-            // for goal in &self.goals {
-            //     goal.render(&mut sd);
-            // }
+            for goal in &self.goals {
+                goal.render(&mut sd);
+            }
 
-            // for evil in &self.evils {
-            //     evil.render(&mut sd);
-            // }
+            for evil in &self.evils {
+                evil.render(&mut sd);
+            }
 
             for shark in &self.sharks {
                 shark.render(&mut sd);

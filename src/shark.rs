@@ -51,9 +51,13 @@ impl Shark{
 
     pub fn move_left(&mut self){
         self.movement.x = -100.0;
+        self.sprite.set_start_index(1);
+        self.sprite.set_end_index(2);
     }
     pub fn move_right(&mut self){
         self.movement.x = 100.0;
+        self.sprite.set_start_index(0);
+        self.sprite.set_end_index(1);
     }
     // pub fn move_up(&mut self){
     //     self.movement.y = -100.0;
