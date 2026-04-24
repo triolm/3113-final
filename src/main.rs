@@ -66,7 +66,7 @@ fn main() {
 
     //dummy
     levels.push(Box::new(Title::new("assets/Page 25.png"))); // 1
-    // levels.push(Box::new(level_steam())); // 1
+    // levels.push(Box::new(level_game())); // 1
     // levels.push(Box::new(level_tuna(&mut rl, &thread))); // 1
     
     levels.push(Box::new(level_game())); // 1
