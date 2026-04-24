@@ -27,7 +27,7 @@ pub struct MarioLevel {
 impl MarioLevel{
 
     pub fn add_block(&mut self, x:f32, y:f32, w:f32, h:f32, texture_path:&str){
-        let mut block = Platformer::new(texture_path.to_string(),Vector2{x:w,y:h});
+        let mut block = Platformer::new(texture_path.to_string(),Vector2{x:w,y:h}, false);
         block.set_position(Vector2 { x,y });
         self.blocks.push(block);
     }
@@ -50,14 +50,14 @@ impl MarioLevel{
 
     pub fn new(bg_path:&str) -> MarioLevel {
 
-        let mut player = Platformer::new("assets/mariosheet.png".to_string(),Vector2{x:75.0,y:75.00});
+        let mut player = Platformer::new("assets/mariosheet.png".to_string(),Vector2{x:75.0,y:75.00}, false);
         player.set_start_position(Vector2 { x: 100.0, y: 100.0 });
         player.get_sprite_mut().set_sprite_sheet_cols(3);
         player.get_sprite_mut().set_sprite_sheet_rows(3);
         // player.set_acceleration(Vector2 { x: 0.0, y: 400.0 });
 
 
-        let mut bg = Platformer::new(bg_path.to_string(),Vector2{x:1600.00,y:1600.00});
+        let mut bg = Platformer::new(bg_path.to_string(),Vector2{x:1600.00,y:1600.00}, false);
         bg.set_position(Vector2 { x: 800.0, y: 800.0 });
 
         let camera = Camera2D{
@@ -156,6 +156,9 @@ impl Scene for MarioLevel {
             self.player.jump();
             self.sound_index = 1;
         }
+
+         if rl.is_key_pressed(KeyboardKey::KEY_P) { self.next = self.goals[0].get_next() as i32 }
+
         //  if rl.is_key_down(KeyboardKey::KEY_DOWN) { self.player.move_down();}
          if rl.is_key_down(KeyboardKey::KEY_R) { self.init(rl);}
         //  if self.rl.is_key_down(KeyboardKey::KEY_RIGHT) { self.player.move_right();}

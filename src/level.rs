@@ -28,8 +28,9 @@ pub struct Level {
 
 impl Level{
     pub fn add_block(&mut self, x:f32, y:f32, texture_path:&str){
-        let mut block = Platformer::new(texture_path.to_string(),Vector2{x:10.0,y:10.0});
+        let mut block = Platformer::new(texture_path.to_string(),Vector2{x:10.0,y:10.0}, true);
         block.set_position(Vector2 { x,y });
+        block.get_sprite_mut().set_sprite_sheet_cols(2);
         self.blocks.push(block);
     }
 
@@ -48,7 +49,7 @@ impl Level{
 
     pub fn new(bg_path:&str) -> Level {
 
-        let mut press_space = Platformer::new("assets/Page11.png".to_string(), Vector2{x:1200.0, y:675.0});
+        let mut press_space = Platformer::new("assets/Page 11.png".to_string(), Vector2{x:1200.0, y:675.0}, false);
         press_space.set_start_position(Vector2 { x: 1200.0/2.0, y: 675.0/2.0 });
         press_space.set_position(Vector2 { x: 1200.0/2.0, y: 675.0/2.0 });
 
@@ -58,7 +59,7 @@ impl Level{
         player.get_sprite_mut().set_sprite_sheet_rows(2);
         player.get_sprite_mut().set_sprite_sheet_cols(2);
 
-        let mut bg = Platformer::new(bg_path.to_string(),Vector2{x:1600.00,y:1600.00});
+        let mut bg = Platformer::new(bg_path.to_string(),Vector2{x:1600.00,y:1600.00}, false);
         bg.set_position(Vector2 { x: 800.0, y: 800.0 });
 
         let camera = Camera2D{
@@ -136,7 +137,14 @@ impl Scene for Level {
 
          if rl.is_key_released(KeyboardKey::KEY_SPACE) { self.player.unset_grapple();}
          if rl.is_key_released(KeyboardKey::KEY_R) { self.init(rl);}
-         else if rl.is_key_pressed(KeyboardKey::KEY_SPACE) { self.player.grapple_closest(&self.blocks);}
+         else if rl.is_key_pressed(KeyboardKey::KEY_SPACE) { 
+            self.player.grapple_closest(&self.blocks);
+            self.sound_index = 6;
+        }
+
+         if rl.is_key_pressed(KeyboardKey::KEY_P) { 
+            self.next = self.goals[0].get_next() as i32 ;
+        }
         //  if self.rl.is_key_down(KeyboardKey::KEY_RIGHT) { self.player.move_right();}
         //  if self.rl.is_key_down(KeyboardKey::KEY_LEFT) { self.player.move_left();}
     }
@@ -153,6 +161,10 @@ impl Scene for Level {
 
         if !self.begun {
             return;
+        }
+
+        for block in &mut self.blocks {
+            block.update(delta_time);
         }
         
         self.player.update(delta_time);
@@ -192,6 +204,30 @@ impl Scene for Level {
             self.screen_shake_v.x = rl.get_random_value::<i32>(-100..100) as f32 / 20.0 * (self.screen_shake / 0.4);
             self.screen_shake_v.y = rl.get_random_value::<i32>(-100..100) as f32 / 20.0 * (self.screen_shake / 0.4);
         }
+
+       
+        let mut closest_index = 0;
+        let mut closest_dist = -1.0;
+
+        if !self.player.is_grappling(){
+            for i in 0..self.blocks.len() {
+                let b = &self.blocks[i];
+                let mut dist = (b.get_position().x - self.player.get_position().x).powf(2.0)
+                    + (b.get_position().y - self.player.get_position().y).powf(2.0);
+                if (b.get_position().x - self.player.get_position().x) * self.player.get_velocity().x < 0.0 {
+                    dist *= 2.0;
+                }
+                if closest_dist < 0.0 || dist < closest_dist {
+                    closest_dist = dist;
+                    closest_index = i;
+                }
+            }
+
+            self.blocks[closest_index].set_next_grapple();
+        }
+    
+        
+
 
         // self.player.resolve_collision_x(&self.block2);
         // self.player.resolve_collision_x(&self.block);

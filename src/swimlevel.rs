@@ -31,7 +31,7 @@ pub struct SwimLevel {
 
 impl SwimLevel{
     pub fn add_block(&mut self, x:f32, y:f32, w:f32, h:f32, texture_path:&str){
-        let mut block = Platformer::new(texture_path.to_string(),Vector2{x:w,y:h});
+        let mut block = Platformer::new(texture_path.to_string(),Vector2{x:w,y:h}, false);
         block.set_position(Vector2 { x,y });
         self.blocks.push(block);
     }
@@ -51,7 +51,7 @@ impl SwimLevel{
         self.sharks.push(shark);
     }
     pub fn add_evil(&mut self, x:f32, y:f32, start:f32, end:f32, texture_path:&str){
-        let mut evil = Platformer::new(texture_path.to_string(),Vector2{x:start, y:end});
+        let mut evil = Platformer::new(texture_path.to_string(),Vector2{x:start, y:end}, false);
         evil.set_start_position(Vector2 { x,y });
         evil.set_position(Vector2 { x,y });
         self.evils.push(evil);
@@ -67,7 +67,7 @@ impl SwimLevel{
 
 
 
-        let mut bg = Platformer::new(bg_path.to_string(),Vector2{x:1600.00,y:1600.00});
+        let mut bg = Platformer::new(bg_path.to_string(),Vector2{x:1600.00,y:1600.00}, false);
         bg.set_position(Vector2 { x: 800.0, y: 800.0 });
 
         let camera = Camera2D{
@@ -165,6 +165,9 @@ impl Scene for SwimLevel {
          if rl.is_key_down(KeyboardKey::KEY_S) { self.player.move_down();}
         //  if rl.is_key_down(KeyboardKey::KEY_DOWN) { self.player.move_down();}
          if rl.is_key_down(KeyboardKey::KEY_R) { self.init(rl);}
+
+         if rl.is_key_pressed(KeyboardKey::KEY_P) { self.next = self.goals[0].get_next() as i32 }
+
         //  if self.rl.is_key_down(KeyboardKey::KEY_RIGHT) { self.player.move_right();}
         //  if self.rl.is_key_down(KeyboardKey::KEY_LEFT) { self.player.move_left();}
     }
@@ -285,17 +288,17 @@ impl Scene for SwimLevel {
 
             self.player.render(&mut sd);
 
-            for block in &self.blocks {
-                block.render(&mut sd);
-            }
+            // for block in &self.blocks {
+            //     block.render(&mut sd);
+            // }
 
-            for goal in &self.goals {
-                goal.render(&mut sd);
-            }
+            // for goal in &self.goals {
+            //     goal.render(&mut sd);
+            // }
 
-            for evil in &self.evils {
-                evil.render(&mut sd);
-            }
+            // for evil in &self.evils {
+            //     evil.render(&mut sd);
+            // }
 
             for shark in &self.sharks {
                 shark.render(&mut sd);

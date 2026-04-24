@@ -11,6 +11,8 @@ mod swimlevel;
 mod goomba;
 mod shark;
 mod swimmer;
+mod title;
+use title::Title;
 use level::Level;
 use entity::Entity;
 use platformer::Platformer;
@@ -52,6 +54,9 @@ fn main() {
     sounds.push(audio.new_sound("assets/smb_stomp.wav").expect("oh no"));
     sounds.push(audio.new_sound("assets/smb_pipe.wav").expect("oh no"));
     sounds.push(audio.new_sound("assets/waterdie.mp3").expect("oh no"));
+    sounds.push(audio.new_sound("assets/vwoop.mp3").expect("oh no"));
+    sounds.push(audio.new_sound("assets/warp.mp3").expect("oh no"));
+    sounds[6].set_volume(0.4);
     
     let mut musics: Vec<Music> = vec![];
     musics.push(audio.new_music("assets/lesbaricades.mp3").expect("oh no"));
@@ -60,8 +65,9 @@ fn main() {
     musics[1].set_volume(0.7);
 
     //dummy
-    // levels.push(Box::new(level_mario())); // 1
-    levels.push(Box::new(level_fish(&mut rl, &thread))); // 1
+    levels.push(Box::new(Title::new("assets/Page 25.png"))); // 1
+    // levels.push(Box::new(level_steam())); // 1
+    // levels.push(Box::new(level_tuna(&mut rl, &thread))); // 1
     
     levels.push(Box::new(level_game())); // 1
     levels.push(Box::new(level_multiplayer())); // 2
@@ -76,6 +82,12 @@ fn main() {
     levels.push(Box::new(level_food())); // 11
     levels.push(Box::new(level_urban())); // 12
     levels.push(Box::new(level_plan())); // 13
+    levels.push(Box::new(level_suburb())); // 14
+    levels.push(Box::new(level_transit())); // 15
+    levels.push(Box::new(level_irt())); // 16
+    levels.push(Box::new(level_steam())); // 17
+    levels.push(Box::new(level_game_1())); // 18
+    levels.push(Box::new(Title::new("assets/Page 26.png"))); // 19
     
     levels[current_level].load(&mut rl, &thread);
     levels[current_level].init(&rl);
@@ -85,7 +97,7 @@ fn main() {
     }
 
     let mut effect_y = 10000.0;
-    let mut press_space = Platformer::new("assets/blue.png".to_string(), Vector2{x:1200.0, y:700.0});
+    let mut press_space = Platformer::new("assets/blue.png".to_string(), Vector2{x:1200.0, y:700.0}, false);
     press_space.set_start_position(Vector2 { x: 1200.0/2.0, y: effect_y});
     press_space.set_position(Vector2 { x: 1200.0/2.0, y: effect_y });
     press_space.load(&mut rl, &thread);
@@ -130,6 +142,7 @@ fn main() {
 
          if levels[current_level].get_next() != -1 && effect == EffectStatus::NONE {
             effect = EffectStatus::RUN;
+            if current_level !=5 { sounds[7].play(); } 
             next = levels[current_level].get_next();
             effect_y = -700.0;
         }
@@ -156,8 +169,28 @@ fn main() {
 }
 
 
+fn level_game_1() -> Level{
+    let mut level:Level = Level::new("./assets/Page 24.png");
+
+    let add: f32 = 10.0;
+
+    level.add_block(232.0, 270.0 + add, "./assets/grapple.png");
+    level.add_block(715.0, 270.0 + add, "./assets/grapple.png");
+    level.add_block(825.0, 500.0 + add, "./assets/grapple.png");
+    level.add_block(440.0, 681.0 + add, "./assets/grapple.png");
+    
+
+    level.add_evil(463.0, 581.0, 800.0, 30.0, "./assets/grapple.png");
+    
+    //esports
+    // level.add_goal(845.0,685.0, 9, "./assets/horse.jpg");
+    // multiplayer
+    level.add_goal(113.0,832.0, 2, "./assets/horse.jpg");
+
+    level
+}
 fn level_game() -> Level{
-    let mut level:Level = Level::new("./assets/Page2.png");
+    let mut level:Level = Level::new("./assets/Page 2.png");
 
     let add: f32 = 10.0;
 
@@ -178,7 +211,7 @@ fn level_game() -> Level{
 }
 
 fn level_video_game() -> Level{
-    let mut level:Level = Level::new("./assets/Page4.png");
+    let mut level:Level = Level::new("./assets/Page 4.png");
 
     let add: f32 = 10.0;
 
@@ -204,7 +237,7 @@ fn level_video_game() -> Level{
 }
 
 fn level_multiplayer() -> Level{
-    let mut level:Level = Level::new("./assets/Page5.png");
+    let mut level:Level = Level::new("./assets/Page 5.png");
 
     let add: f32 = 20.0;
 
@@ -223,7 +256,7 @@ fn level_multiplayer() -> Level{
 }
 
 fn level_nintendo() -> Level{
-    let mut level:Level = Level::new("./assets/Page6.png");
+    let mut level:Level = Level::new("./assets/Page 6.png");
 
     let add: f32 = 20.0;
 
@@ -242,7 +275,7 @@ fn level_nintendo() -> Level{
 }
 
 fn level_esports() -> Level{
-    let mut level:Level = Level::new("./assets/Page7.png");
+    let mut level:Level = Level::new("./assets/Page 7.png");
 
     let add: f32 = 20.0;
 
@@ -264,7 +297,7 @@ fn level_esports() -> Level{
     level
 }
 fn level_mario() -> MarioLevel{
-    let mut level:MarioLevel = MarioLevel::new("./assets/Page8.png");
+    let mut level:MarioLevel = MarioLevel::new("./assets/Page 8.png");
 
     let add: f32 = 00.0;
 
@@ -286,7 +319,7 @@ fn level_mario() -> MarioLevel{
     level
 }
 fn level_river(rl:&mut RaylibHandle, thread:&RaylibThread) -> SwimLevel{
-    let mut level:SwimLevel = SwimLevel::new(rl, thread, "./assets/Page9.png");
+    let mut level:SwimLevel = SwimLevel::new(rl, thread, "./assets/Page 9.png");
 
     let add: f32 = 00.0;
 
@@ -307,7 +340,7 @@ fn level_river(rl:&mut RaylibHandle, thread:&RaylibThread) -> SwimLevel{
     level
 }
 fn level_fish(rl:&mut RaylibHandle, thread:&RaylibThread) -> SwimLevel{
-    let mut level:SwimLevel = SwimLevel::new(rl, thread, "./assets/Page10.png");
+    let mut level:SwimLevel = SwimLevel::new(rl, thread, "./assets/Page 10.png");
 
 
     level.add_block(59.0, 662.0, 25.0, 830.0,  "./assets/blue.png");
@@ -329,7 +362,7 @@ fn level_fish(rl:&mut RaylibHandle, thread:&RaylibThread) -> SwimLevel{
     level
 }
 fn level_tuna(rl:&mut RaylibHandle, thread:&RaylibThread) -> SwimLevel{
-    let mut level:SwimLevel = SwimLevel::new(rl, thread, "./assets/Page12.png");
+    let mut level:SwimLevel = SwimLevel::new(rl, thread, "./assets/Page 12.png");
 
 
     level.add_block(1057.0, 800.0, 25.0, 2000.0,  "./assets/blue.png");
@@ -338,16 +371,16 @@ fn level_tuna(rl:&mut RaylibHandle, thread:&RaylibThread) -> SwimLevel{
     level.add_block(204.0, 719.0 - 20.0, 25.0, 160.0 + 40.0,  "./assets/blue.png");
     
     // food
-    level.add_goal(367.0, 752.0, 11, "./assets/grapple.png");
+    level.add_goal(877.0, 710.0, 11, "./assets/grapple.png");
 
     level.add_evil(488.0, 524.0, 302.0, 20.0, "./assets/grapple.png");
 
     level.add_shark(265.0 + 50.0, 811.0, 265.0 + 50.0, 500.0 - 50.0, "./assets/shork.png");
-    level.add_shark(500.0 + 50.0, 855.0, 265.0 + 50.0, 500.0 - 50.0, "./assets/shork.png");
+    level.add_shark(500.0 - 50.0, 855.0, 265.0 + 50.0, 500.0 - 50.0, "./assets/shork.png");
     level.add_shark(265.0 + 50.0, 900.0, 265.0 + 50.0, 500.0 - 50.0, "./assets/shork.png");
 
     level.add_shark(500.0 + 50.0, 811.0, 500.0 + 50.0, 1000.0 - 50.0, "./assets/shork.png");
-    level.add_shark(1000.0 + 50.0, 855.0, 500.0 + 50.0, 1000.0 - 50.0, "./assets/shork.png");
+    level.add_shark(1000.0 - 50.0, 855.0, 500.0 + 50.0, 1000.0 - 50.0, "./assets/shork.png");
     level.add_shark(500.0 + 50.0, 900.0, 500.0 + 50.0, 1000.0 - 50.0, "./assets/shork.png");
 
     level
@@ -405,6 +438,8 @@ fn level_urban() -> Level{
     level.add_evil(57.0, 644.0, 20.0, 797.0, "./assets/grapple.png");
     level.add_evil(433.0, 644.0, 20.0, 797.0, "./assets/grapple.png");
     level.add_evil(796.0, 996.0, 351.0, 20.0, "./assets/grapple.png");
+    level.add_evil(103.0, 604.0, 79.0, 20.0, "./assets/grapple.png");
+    level.add_evil(383.0, 889.0, 74.0, 20.0, "./assets/grapple.png");
 
     //  plan
     level.add_goal(792.0,956.0, 13, "./assets/horse.jpg");
@@ -423,8 +458,8 @@ fn level_plan() -> Level{
     level.add_evil(390.0, 498.0, 679.0, 22.0, "./assets/grapple.png");
     level.add_evil(797.0, 458.0, 531.0, 22.0, "./assets/grapple.png");
 
-    //  river
-    level.add_goal(182.0,842.0, 6, "./assets/horse.jpg");
+    //  suburb
+    level.add_goal(182.0,842.0, 14, "./assets/horse.jpg");
 
     level
 }
@@ -441,8 +476,69 @@ fn level_suburb() -> Level{
     level.add_evil(403.0, 578.0, 705.0, 22.0, "./assets/grapple.png");
     level.add_evil(301.0, 997.0, 501.0, 22.0, "./assets/grapple.png");
 
-    //  river
-    level.add_goal(85.0,1157.0, 6, "./assets/horse.jpg");
+    //  transit
+    level.add_goal(85.0,1157.0, 15, "./assets/horse.jpg");
+
+    level
+}
+
+fn level_transit() -> Level{
+    let mut level:Level = Level::new("./assets/Page 18.png");
+
+    let add: f32 = 20.0;
+
+    level.add_block(300.0, 254.0 + add, "./assets/grapple.png");
+    // level.add_block(79.0, 727.0 + add, "./assets/grapple.png");
+    level.add_block(471.0, 683.0 + add, "./assets/grapple.png");
+    
+    level.add_evil(175.0, 537.0, 250.0, 22.0, "./assets/grapple.png");
+    level.add_evil(735.0, 537.0, 470.0, 22.0, "./assets/grapple.png");
+    level.add_evil(736.0, 951.0, 720.0, 22.0, "./assets/grapple.png");
+
+    //  irt
+    level.add_goal(683.0 - 50.0,992.0, 16, "./assets/horse.jpg");
+    level.add_goal(683.0 + 50.0,992.0, 16, "./assets/horse.jpg");
+
+    level
+}
+
+fn level_irt() -> Level{
+    let mut level:Level = Level::new("./assets/Page 22.png");
+
+    let add: f32 = 20.0;
+
+    level.add_block(305.0, 291.0 + add, "./assets/grapple.png");
+    level.add_block(458.0, 560.0 + add, "./assets/grapple.png");
+    
+    level.add_evil(146.0, 642.0, 190.0, 22.0, "./assets/grapple.png");
+    level.add_evil(236.0, 681.0, 95.0, 22.0, "./assets/grapple.png");
+    level.add_evil(415.0, 724.0, 210.0, 22.0, "./assets/grapple.png");
+    level.add_evil(771.0, 832.0, 225.0, 22.0, "./assets/grapple.png");
+    level.add_evil(478.0, 874.0, 181.0, 22.0, "./assets/grapple.png");
+    level.add_evil(307.0, 1074.0, 516.0, 22.0, "./assets/grapple.png");
+
+    //  steam
+    level.add_goal(400.0,1235.0, 17, "./assets/horse.jpg");
+
+    level
+}
+
+fn level_steam() -> Level{
+    let mut level:Level = Level::new("./assets/Page 23.png");
+
+    let add: f32 = 20.0;
+
+    level.add_block(243.0, 293.0 + add, "./assets/grapple.png");
+    level.add_block(951.0, 685.0 + add, "./assets/grapple.png");
+    level.add_block(291.0, 961.0 + add, "./assets/grapple.png");
+    level.add_block(906.0, 1161.0 + add, "./assets/grapple.png");
+    
+    level.add_evil(686.0, 252.0, 601.0, 22.0, "./assets/grapple.png");
+    level.add_evil(500.0, 576.0, 900.0, 22.0, "./assets/grapple.png");
+    level.add_evil(574.0, 1001.0, 782.0, 22.0, "./assets/grapple.png");
+
+    //  game
+    level.add_goal(961.0,1384.0, 19, "./assets/horse.jpg");
 
     level
 }

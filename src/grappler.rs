@@ -21,8 +21,9 @@ impl Grappler{
 
 
     pub fn new(texture: String, scale: Vector2) -> Grappler{
-        let s = Sprite::new(texture,scale);
-
+        let mut s = Sprite::new(texture,scale);
+        s.set_start_index(1);
+        s.set_end_index(2);
         Grappler{
             start_position : Vector2{x:200.0,y:200.0},
             position : Vector2{x:200.0,y:200.0},
@@ -94,12 +95,12 @@ impl Grappler{
             }
         );
 
-        if self.velocity.x > 0.0 {
-            self.sprite.set_start_index(1);
-            self.sprite.set_end_index(2);
-        } else {
+        if self.velocity.x < 0.0 {
             self.sprite.set_start_index(3);
             self.sprite.set_end_index(4);
+        } else {
+            self.sprite.set_start_index(1);
+            self.sprite.set_end_index(2);
         }
 
         self.sprite.set_angle((self.velocity.y.atan2(self.velocity.x) * 57.2958 - 90.0)/4.0);
@@ -192,6 +193,7 @@ impl Entity for Grappler{
             }        
         } else {
             self.acceleration = Vector2 { x: 0.0, y: self.gravity };
+
         }
 
         self.reset_collider_flags();

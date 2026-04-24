@@ -15,12 +15,13 @@ pub struct Platformer{
     start_position: Vector2,
     jump_countdown: f32,
     frame_counter: f32,
-
+    grapple_possible:bool,
+    next_grapple: bool,
 }
 
 impl Platformer{
 
-    pub fn new(texture_path:String, scale: Vector2) -> Platformer{
+    pub fn new(texture_path:String, scale: Vector2, grapple_possible:bool) -> Platformer{
         let s = Sprite::new(texture_path,scale);
 
         Platformer{
@@ -37,8 +38,14 @@ impl Platformer{
             start_position : Vector2{x:200.0,y:200.0},
             jump_countdown: 0.0,
             frame_counter: 0.0,
+            grapple_possible,
+            next_grapple:false,
 
         }   
+    }
+
+    pub fn set_next_grapple(&mut self){
+        self.next_grapple = true;
     }
 
     pub fn reset_movement(&mut self){
@@ -96,6 +103,10 @@ impl Entity for Platformer{
             self.movement.x /= 1.4142135;
             self.movement.y /= 1.4142135;
         }
+
+      
+
+
         if self.get_sprite().get_sprite_sheet_cols() > 1 {
             if self.is_colliding_bottom() {
                 if self.movement.x < 0.0 {
@@ -123,6 +134,17 @@ impl Entity for Platformer{
 
         self.reset_collider_flags();
         self.update_velocity(delta_time);
+
+        if self.grapple_possible {
+            self.sprite.set_start_index(0);
+            self.sprite.set_end_index(1);
+            if self.next_grapple {
+                self.sprite.set_start_index(1);
+                self.sprite.set_end_index(2);
+            }
+        }
+        self.next_grapple = false;
+
 
          self.frame_counter += delta_time;
         if self.frame_counter > 0.2 { 
